@@ -210,6 +210,40 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
     Route::post('/admins/bulkDelete', [\App\Http\Controllers\Admin\AdminsController::class, 'bulkDelete'])->name('admins.bulkDelete');
     Route::post('/admins/changeStatus', [\App\Http\Controllers\Admin\AdminsController::class, 'changeStatus'])->name('admins.changeStatus');
 
+
+    Route::resource('/items', \App\Http\Controllers\Admin\ItemsController::class)->names('items')->except('show');
+
+    Route::get('/items/data', [\App\Http\Controllers\Admin\ItemsController::class, 'getData'])->name('items.data');
+
+    Route::post('/items/bulkDelete', [\App\Http\Controllers\Admin\ItemsController::class, 'bulkDelete'])->name('items.bulkDelete');
+
+    Route::post('/items/bulkChangeStatus', [\App\Http\Controllers\Admin\ItemsController::class, 'bulkChangeStatus'])->name('items.bulkChangeStatus');
+
+    Route::post('/items/changeStatus', [\App\Http\Controllers\Admin\ItemsController::class, 'changeStatus'])->name('items.changeStatus');
+    Route::resource('/items', \App\Http\Controllers\Admin\ItemsController::class)->names('items')->except('show');
+
+    Route::get('/items/data', [\App\Http\Controllers\Admin\ItemsController::class, 'getData'])->name('items.data');
+
+    Route::post('/items/bulkDelete', [\App\Http\Controllers\Admin\ItemsController::class, 'bulkDelete'])->name('items.bulkDelete');
+
+    Route::post('/items/bulkChangeStatus', [\App\Http\Controllers\Admin\ItemsController::class, 'bulkChangeStatus'])->name('items.bulkChangeStatus');
+
+    Route::post('/items/changeStatus', [\App\Http\Controllers\Admin\ItemsController::class, 'changeStatus'])->name('items.changeStatus');
+
+    Route::resource('/supplies', \App\Http\Controllers\Admin\SuppliesController::class)->names('supplies')->except('show');
+
+    Route::get('/supplies/data', [\App\Http\Controllers\Admin\SuppliesController::class, 'getData'])->name('supplies.data');
+
+    Route::post('/supplies/bulkDelete', [\App\Http\Controllers\Admin\SuppliesController::class, 'bulkDelete'])->name('supplies.bulkDelete');
+
+    Route::post('/supplies/bulkChangeStatus', [\App\Http\Controllers\Admin\SuppliesController::class, 'bulkChangeStatus'])->name('supplies.bulkChangeStatus');
+
+    Route::post('/supplies/changeStatus', [\App\Http\Controllers\Admin\SuppliesController::class, 'changeStatus'])->name('supplies.changeStatus');
+
+
+    Route::resource('/quotations', \App\Http\Controllers\Admin\QuotationController::class)->names('suppliers')->except('show');
+    
+
 });
 
 Route::get('/sendNotification', function () {

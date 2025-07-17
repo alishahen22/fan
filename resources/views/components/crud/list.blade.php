@@ -341,7 +341,8 @@
         <script>
             $(document).ready(function () {
                 // Attach the change event listener to a parent element that exists in the DOM
-                $(document).on('change', '.switch-status', function () {
+                $(document).on('change', '.
+                s', function () {
                     var id = $(this).data('id');
                     var isActive = $(this).prop('checked') ? 1 : 0;
 

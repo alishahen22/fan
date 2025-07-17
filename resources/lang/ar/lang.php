@@ -1147,5 +1147,21 @@ return [
     'room_available_items_not_enough' => 'الكميه المتاحه لا تكفي',
     'room_not_available' => 'غير متاحه',
     'tax_percent' => 'مصاريف الشحن',
+    "Name Ar"=> "الاسم (عربي)",
+    "Name En"=> "الاسم (إنجليزي)",
+    "Type"=> "النوع",
+    "Width (cm)"=> "العرض (سم)",
+    "Height (cm)"=> "الارتفاع (سم)",
+    "Price"=> "السعر",
+    "Weight (grams)"=> "الوزن (جرام)",
+    "Image"=> "الصورة",
+    "Notes"=> "ملاحظات",
+    "Submit"=> "حفظ",
+    "Please Enter a value"=> "من فضلك أدخل قيمة",
+    "Please Enter a valid width"=> "من فضلك أدخل عرضًا صحيحًا",
+    "Please Enter a valid height"=> "من فضلك أدخل ارتفاعًا صحيحًا",
+    "Please Enter a valid price"=> "من فضلك أدخل سعرًا صحيحًا",
+    "Please Enter a valid weight"=> "من فضلك أدخل وزنًا صحيحًا",
+    "Please choose an image"=> "من فضلك اختر صورة"
 
 ];
