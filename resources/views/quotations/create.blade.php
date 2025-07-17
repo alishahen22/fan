@@ -1,7 +1,7 @@
 @extends('layouts.master')
 @section('title') {{ __('Add Quotation') }} @endsection
 @section('css')
-    
+
 @endsection
 
 @section('content')
@@ -11,11 +11,12 @@
     @slot('title') {{ __('Add Quotation') }} @endslot
 @endcomponent
 
+    <livewire:quotation-form />
 
 @endsection
 
 @section('script')
- 
+
 @endsection
 
 

@@ -20,6 +20,8 @@
             text-align: center;
         }
     </style>
+            @livewireStyles
+
 </head>
 
 @section('body')
@@ -50,6 +52,8 @@
 
 <!-- JAVASCRIPT -->
 @include('layouts.vendor-scripts')
+
+    @livewireScripts
 </body>
 
 </html>
