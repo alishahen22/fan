@@ -240,8 +240,8 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
 
     Route::post('/supplies/changeStatus', [\App\Http\Controllers\Admin\SuppliesController::class, 'changeStatus'])->name('supplies.changeStatus');
 
-
-        Route::resource('/quotations', \App\Http\Controllers\Admin\QuotationController::class)->names('suppliers')->except('show');
+    Route::get('/quotations/{quotation}/pdf', [\App\Http\Controllers\Admin\QuotationController::class, 'generatePdf'])->name('quotations.pdf');
+    Route::resource('/quotations', \App\Http\Controllers\Admin\QuotationController::class)->names('quotations');
 
     //PrintService
     Route::resource('/print-services', \App\Http\Controllers\Admin\PrintServiceController::class)->names('print-services')->except('show');

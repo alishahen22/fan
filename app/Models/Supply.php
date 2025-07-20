@@ -17,4 +17,9 @@ class Supply extends Model
     {
         return $this->belongsToMany(PrintService::class);
     }
+
+    //   public function quotationItems()
+    //     {
+    //         return $this->belongsToMany(QuotationItem::class, 'quotation_item_supply') ;
+    //     }
 }

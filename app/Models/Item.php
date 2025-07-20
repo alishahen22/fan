@@ -19,4 +19,9 @@ class Item extends Model
         return $this->belongsToMany(PrintService::class);
     }
 
+      public function quotationItems()
+    {
+        return $this->belongsToMany(QuotationItem::class, 'item_quotation_item');
+    }
+
 }

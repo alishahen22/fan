@@ -16,6 +16,7 @@
                             <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
                     </select>
+                    @error('customer_name') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
 
                 {{-- الرقم الضريبي (مقروء فقط) --}}
@@ -35,6 +36,9 @@
                     <label class="form-label">التاريخ</label>
                     <input type="date" class="form-control" wire:model="quotation_date">
                 </div>
+                @error('quotation_date') <small class="text-danger">{{ $message }}</small>
+
+                @enderror
 
                 {{-- الرقم العشوائي --}}
                 <div class="col-md-3 mb-3">
@@ -46,6 +50,7 @@
         </div>
     </div>
 </div>
+
 <div class="mb-3">
     <label class="form-label fw-bold"/>اختر صنف جاهز</label>
  <select wire:change="loadPrintServiceInfo($event.target.value)" wire:model="selectedPrintServiceId" class="form-select">
@@ -60,43 +65,44 @@
 </div>
     {{-- جدول الأصناف --}}
     <div class="table-responsive">
+        @error('items') <small class="text-danger d-block">{{ $message }}</small> @enderror
 
-<table class="table table-bordered text-center align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>الصنف</th>
-            <th>الكمية</th>
-            <th>سعر </th>
-            <th>الإجمالي</th>
-            <th>حذف</th>
-        </tr>
-
-    </thead>
-    <tbody>
-        @foreach($items as  $index => $item)
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
             <tr>
-
-                <td class="text-start">
-                    <div>{{ $item['description'] }}</div>
-                    @if(!empty($item['supplies']))
-                        <small class=" d-block mt-1">
-                            المستلزمات: {{ implode('، ', $item['supplies']) }}
-                        </small>
-                    @endif
-                </td>
-                <td>{{ $item['quantity'] }}</td>
-
-                <td>{{ number_format($item['price'], 2) }} ج.م</td>
-                <td class="fw-bold">{{ number_format($item['total_price'], 2) }} ج.م</td>
-                 <td>
-                    <button wire:click="removeItem({{ $index }})" class="btn btn-sm btn-danger">
-                        ✖
-                    </button>
-                </td>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>سعر </th>
+                <th>الإجمالي</th>
+                <th>حذف</th>
             </tr>
-        @endforeach
-    </tbody>
-</table>
+
+        </thead>
+        <tbody>
+            @foreach($items as  $index => $item)
+                <tr>
+
+                    <td class="text-start">
+                        <div>{{ $item['description'] }}</div>
+                        @if(!empty($item['supplies']))
+                            <small class=" d-block mt-1">
+                                المستلزمات: {{ implode('، ', $item['supplies']) }}
+                            </small>
+                        @endif
+                    </td>
+                    <td>{{ $item['quantity'] }}</td>
+
+                    <td>{{ number_format($item['price'], 2)  }} ج.م</td>
+                    <td class="fw-bold">{{ number_format($item['total_price'], 2) }} ج.م</td>
+                    <td>
+                        <button wire:click="removeItem({{ $index }})" class="btn btn-sm btn-danger">
+                            ✖
+                        </button>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
 
 
@@ -110,8 +116,8 @@
 
     </div>
     {{-- الإجماليات --}}
-   <div class="text-end my-4 p-4 bg-light rounded shadow-sm border" style="max-width: 400px; margin-right: auto;">
-    <h5 class="mb-3 border-bottom pb-2">ملخص الفاتورة</h5>
+    <div class="text-end my-4 p-4 bg-light rounded shadow-sm border" style="max-width: 400px; margin-right: auto;">
+        <h5 class="mb-3 border-bottom pb-2">ملخص الفاتورة</h5>
 
     <div class="d-flex justify-content-between mb-2">
         <span><strong>الإجمالي:</strong></span>
@@ -119,8 +125,8 @@
     </div>
 
     <div class="d-flex justify-content-between mb-2">
-        <span><strong>الضريبة 15%:</strong></span>
-        <span>{{ number_format($this->tax, 2) }} ج.م</span>
+        <span><strong>الضريبة {{ $this->tax }}%:</strong></span>
+        <span>{{ number_format($this->taxNumber, 2) }} ج.م</span>
     </div>
 
     <hr>
@@ -129,7 +135,10 @@
         <span>المطلوب:</span>
         <span>{{ number_format($this->totalWithTax, 2) }} ج.م</span>
     </div>
-</div>
+
+    </div>
+
+
 
 
 
@@ -138,9 +147,9 @@
 
     {{-- الأزرار --}}
     <div class="d-flex justify-content-center flex-wrap gap-3 mb-4">
-        <button class="btn btn-outline-dark">إرسال للعميل إيميل أو في ملفه</button>
-        <button class="btn btn-outline-dark">pdf حفظ</button>
-        <button class="btn btn-outline-dark">طباعة</button>
+        <button class="btn btn-outline-dark" wire:click="sendEmail">إرسال للعميل إيميل أو في ملفه</button>
+        <button class="btn btn-outline-dark" wire:click="saveAsPdf">pdf حفظ</button>
+        <button class="btn btn-outline-dark" wire:click="printQuotation">طباعة</button>
         <button wire:click="saveQuotation" class="btn btn-outline-dark">💾 حفظ عرض السعر</button>
 
     </div>
