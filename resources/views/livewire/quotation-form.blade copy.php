@@ -46,27 +46,18 @@
         </div>
     </div>
 </div>
-<div class="mb-3">
-    <label class="form-label fw-bold"/>اختر صنف جاهز</label>
- <select wire:change="loadPrintServiceInfo($event.target.value)" wire:model="selectedPrintServiceId" class="form-select">
-    <option value="">— اختر —</option>
-    @foreach(\App\Models\PrintService::where('hidden', false)->withCount('items')->get() as $service)
-        <option value="{{ $service->id }}">
-            {{ $service->name_ar }} - {{ $service->quantity }} قطعة ({{ $service->width }}×{{ $service->height }} سم)
-        </option>
-    @endforeach
-</select>
-
-</div>
     {{-- جدول الأصناف --}}
     <div class="table-responsive">
-
 <table class="table table-bordered text-center align-middle">
     <thead class="table-light">
         <tr>
+            {{-- <th>الصنف</th> --}}
             <th>الصنف</th>
             <th>الكمية</th>
-            <th>سعر </th>
+            {{-- <th>عدد الكروت/ورقة</th>
+            <th>عدد الورق</th> --}}
+            <th>سعر الورق</th>
+            <th>سعر المستلزمات</th>
             <th>الإجمالي</th>
             <th>حذف</th>
         </tr>
@@ -75,7 +66,11 @@
     <tbody>
         @foreach($items as  $index => $item)
             <tr>
-
+                {{-- <td>
+                    @foreach($item['names'] as $name)
+                        {{ $name }}<br>
+                    @endforeach
+                </td> --}}
                 <td class="text-start">
                     <div>{{ $item['description'] }}</div>
                     @if(!empty($item['supplies']))
@@ -85,8 +80,18 @@
                     @endif
                 </td>
                 <td>{{ $item['quantity'] }}</td>
-
-                <td>{{ number_format($item['price'], 2) }} ج.م</td>
+                {{-- <td>
+                    @foreach($item['cards_per_sheet'] as $v)
+                        {{ $v }}<br>
+                    @endforeach
+                </td>
+                <td>
+                    @foreach($item['sheets_required'] as $v)
+                        {{ $v }}<br>
+                    @endforeach
+                </td> --}}
+                <td>{{ number_format($item['paper_price'], 2) }} ج.م</td>
+                <td>{{ number_format($item['supplies_price'], 2) }} ج.م</td>
                 <td class="fw-bold">{{ number_format($item['total_price'], 2) }} ج.م</td>
                  <td>
                     <button wire:click="removeItem({{ $index }})" class="btn btn-sm btn-danger">
@@ -108,7 +113,7 @@
        <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف</button>
        {{-- <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف</button> --}}
 
-    </div>
+
     {{-- الإجماليات --}}
    <div class="text-end my-4 p-4 bg-light rounded shadow-sm border" style="max-width: 400px; margin-right: auto;">
     <h5 class="mb-3 border-bottom pb-2">ملخص الفاتورة</h5>
@@ -227,15 +232,6 @@
                         @error('newItem.supplies') <small class="text-danger d-block">{{ $message }}</small> @enderror
                         @error('newItem.supplies.*') <small class="text-danger d-block">{{ $message }}</small> @enderror
                     </div>
-
-                   <div class="col-md-12">
-                    <div class="form-check form-switch fs-5 ps-5">
-                        <input class="form-check-input form-check-input-lg" type="checkbox" role="switch" id="saveToDatabaseSwitch" wire:model="newItem.save_to_db" style="transform: scale(1.5); margin-left: 1rem;">
-                        <label class="form-check-label fw-bold" for="saveToDatabaseSwitch">
-                            ✅ حفظ هذا الصنف ؟
-                        </label>
-                    </div>
-                </div>
 
                 </div>
             </div>

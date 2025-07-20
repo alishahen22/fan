@@ -180,14 +180,14 @@ class ItemsController extends Controller
     }
 
 
-public function columns(): array {
-    return [
-        ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false],
-            ['data' => 'image', 'name' => 'image', 'label' => trans('Image')],
-        ['data' => 'name_'.App::getLocale(), 'name' => 'name_'.App::getLocale(), 'label' => __('Name')],
-        ['data' => 'type', 'name' => 'type', 'label' => __('Type')],
-        ['data' => 'price', 'name' => 'price', 'label' => __('Price')],
-        ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
-    ];
-}
+    public function columns(): array {
+        return [
+            ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false],
+                ['data' => 'image', 'name' => 'image', 'label' => trans('Image')],
+            ['data' => 'name_'.App::getLocale(), 'name' => 'name_'.App::getLocale(), 'label' => __('Name')],
+            ['data' => 'type', 'name' => 'type', 'label' => __('Type')],
+            ['data' => 'price', 'name' => 'price', 'label' => __('Price')],
+            ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
+        ];
+    }
 }

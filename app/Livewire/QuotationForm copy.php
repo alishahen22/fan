@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\PrintService;
 use Livewire\Component;
 
 class QuotationForm extends Component
@@ -25,12 +24,10 @@ class QuotationForm extends Component
     'quantity' => '',
     'calculated_price' => '',
     'supplies' => [],
-    'save_to_db' => true,
     ];
     public $itemsList = [];
 
     public $suppliesList  = [];
-        public $selectedPrintServiceId;
 
     public function render()
     {
@@ -61,7 +58,42 @@ class QuotationForm extends Component
         }
     }
 
+    public function updatedNewItem($value)
+    {
+        $this->calculateItemPrice();
+    }
 
+    public function calculateItemPrice()
+    {
+        $item = \App\Models\Item::find($this->newItem['item_id'] ?? null);
+
+        if (!$item || !$this->newItem['input_width'] || !$this->newItem['input_height'] || !$this->newItem['quantity']) {
+            $this->newItem['calculated_price'] = 0;
+            return;
+        }
+
+        $sheetArea = $item->width_cm * $item->height_cm;
+        $cardArea = $this->newItem['input_width'] * $this->newItem['input_height'];
+
+        if ($cardArea == 0) {
+            $this->newItem['calculated_price'] = 0;
+            return;
+        }
+
+        $cardsPerSheet = floor($sheetArea / $cardArea);
+        if ($cardsPerSheet <= 0) {
+            $this->newItem['calculated_price'] = 0;
+            return;
+        }
+
+        $sheetsRequired = ceil($this->newItem['quantity'] / $cardsPerSheet); // ✅ القسمة مش الضرب
+        $paperPrice = $sheetsRequired * $item->price;
+        // جمع أسعار المستلزمات
+        $suppliesTotal = \App\Models\Supply::whereIn('id', $this->newItem['supplies'] ?? [])->sum('price');
+
+        $totalPrice = $paperPrice + $suppliesTotal;
+        $this->newItem['calculated_price'] = round($totalPrice, 2);
+    }
 
 
     public function addItem()
@@ -77,27 +109,51 @@ class QuotationForm extends Component
             'newItem.supplies.*'    => 'exists:supplies,id',
         ]);
 
-          $printService = PrintService::create([
-            'name_ar' => $this->newItem['description'],
-            'name_en' => $this->newItem['description'],
-            'quantity' => $this->newItem['quantity'],
-            'width' => $this->newItem['input_width'],
-            'height' => $this->newItem['input_height'],
-            'hidden' => $this->newItem['save_to_db'] ? false : true,
-        ]);
+        $supplies = \App\Models\Supply::whereIn('id', $this->newItem['supplies'] ?? [])->get();
+        $supplyNames = $supplies->pluck('name_ar')->toArray();
+        $suppliesTotal = $supplies->sum('price');
 
-        $printService->items()->sync($this->newItem['item_ids']?? []);
-        $printService->supplies()->sync($this->newItem['supplies'] ?? []);
+        $itemNames = [];
+        $cardsPerSheetArr = [];
+        $sheetsRequiredArr = [];
+        $paperPrices = [];
+        $paperPriceTotal = 0;
+
+        foreach ($this->newItem['item_ids'] as $itemId) {
+            $item = \App\Models\Item::find($itemId);
+
+            $sheetArea = $item->width_cm * $item->height_cm;
+            $cardArea = $this->newItem['input_width'] * $this->newItem['input_height'];
+
+            if ($cardArea <= 0 || $sheetArea <= 0) continue;
+
+            $cardsPerSheet = floor($sheetArea / $cardArea);
+            if ($cardsPerSheet <= 0) $cardsPerSheet = 1;
+
+            $sheetsRequired = ceil($this->newItem['quantity'] / $cardsPerSheet);
+            $paperPrice = $sheetsRequired * $item->price;
+
+            $itemNames[] = $item->name_ar;
+            $cardsPerSheetArr[] = $cardsPerSheet;
+            $sheetsRequiredArr[] = $sheetsRequired;
+            $paperPrices[] = $paperPrice;
+
+            $paperPriceTotal += $paperPrice;
+        }
+
+        $totalPrice = $paperPriceTotal + $suppliesTotal;
 
         $this->items[] = [
-                'names'             => $printService->items->pluck('name_ar')->toArray(),
-                'description'       => $printService->name_ar,
-                'supplies'          => $printService->supplies->pluck('name_ar')->toArray(),
-                'quantity'          => $printService->quantity,
-                'price'             => $printService->item_price,
-                'total_price'       => $printService->total_price,
-            ];
-
+            'names'             => $itemNames,
+            'description'       => $this->newItem['description'],
+            'supplies'          => $supplyNames,
+            'quantity'          => $this->newItem['quantity'],
+            'cards_per_sheet'   => $cardsPerSheetArr,
+            'sheets_required'   => $sheetsRequiredArr,
+            'paper_price'       => $paperPriceTotal,
+            'supplies_price'    => $suppliesTotal,
+            'total_price'       => round($totalPrice, 2),
+        ];
         $this->newItem = [];
         $this->showAddItemModal = false;
     }
@@ -127,7 +183,6 @@ class QuotationForm extends Component
             'quantity' => 1,
             'supplies' => [],
             'calculated_price' => '',
-            'save_to_db' => true,
         ];
 
         $this->showAddItemModal = true;
@@ -201,29 +256,4 @@ class QuotationForm extends Component
             'showAddItemModal',
         ]);
     }
-
-
-
-    public function loadPrintServiceInfo($id)
-    {
-        if (!$id) return;
-
-        $service = \App\Models\PrintService::with(['items', 'supplies'])->find($id);
-
-        if (!$service) return;
-
-
-        $this->items[] = [
-            'names'             => $service->items->pluck('name_ar')->toArray(),
-            'description'       => $service->name_ar,
-            'supplies'          => $service->supplies->pluck('name_ar')->toArray(),
-            'quantity'          => $service->quantity,
-            'price'             => $service->item_price,
-            'total_price'       => $service->total_price,
-        ];
-
-        // Reset dropdown
-        $this->selectedPrintServiceId = null;
-    }
-
 }

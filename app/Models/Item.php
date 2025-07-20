@@ -14,4 +14,9 @@ class Item extends Model
         'price', 'weight_grams', 'notes', 'image', 'is_active'
     ];
 
+    public function printServices()
+    {
+        return $this->belongsToMany(PrintService::class);
+    }
+
 }

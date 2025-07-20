@@ -12,4 +12,9 @@ class Supply extends Model
     protected $fillable = [
         'name_ar', 'name_en', 'price', 'image', 'is_active',
     ];
+
+    public function printServices()
+    {
+        return $this->belongsToMany(PrintService::class);
+    }
 }
