@@ -1,6 +1,10 @@
 <div class="container py-4">
+    <h2 class="mb-4 text-center">
+        <i class="fas fa-file-invoice"></i>
+        {{ $document_type === 'quotation' ? 'إنشاء عرض سعر جديد' : 'إنشاء فاتورة جديدة' }}
 
-   {{-- بيانات العميل --}}
+    </h2>
+
 <div class="row justify-content-center mb-4">
     <div class="col-md-8">
         <div class="card p-4 shadow-sm">
@@ -43,7 +47,7 @@
                 {{-- الرقم العشوائي --}}
                 <div class="col-md-3 mb-3">
                     <label class="form-label">رقم عرض السعر</label>
-                    <input type="text" class="form-control" wire:model="quotation_number" readonly>
+              <input type="text" class="form-control" wire:model.defer="quotation_number" readonly value="{{ $quotation_number }}">
                 </div>
 
             </div>
@@ -109,6 +113,8 @@
 
     </div>
 
+
+
     {{-- زر إضافة صنف --}}
     <div class="mb-4">
        <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف</button>
@@ -139,7 +145,17 @@
     </div>
 
 
-
+    <div
+        x-data="{ show: false }"
+        x-on:toast-success.window="show = true; setTimeout(() => show = false, 3000)"
+        x-show="show"
+        x-transition
+        style="display: none;"
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+            bg-green-600  text-lg px-8 py-5 rounded-lg shadow-lg z-50 text-center "
+    >
+        {{ $saveMessage }}
+    </div>
 
 
 
@@ -147,22 +163,29 @@
 
     {{-- الأزرار --}}
     <div class="d-flex justify-content-center flex-wrap gap-3 mb-4">
-        {{-- <button class="btn btn-outline-dark" wire:click="sendEmail">إرسال للعميل إيميل أو في ملفه</button> --}}
+
         <button class="btn btn-outline-dark" wire:click="saveAsPdf">pdf حفظ</button>
         <button class="btn btn-outline-dark" wire:click="printQuotation">طباعة</button>
-        <button wire:click="saveQuotation" class="btn btn-outline-dark">💾 حفظ عرض السعر</button>
+        <button wire:click="saveQuotation" class="btn btn-outline-dark">
+            💾 حفظ {{ $document_type === 'quotation' ? 'عرض السعر' : 'الفاتورة' }}
+        </button>
+        @if ($document_type === 'quotation')
+            <button wire:click="convertToInvoice" class="btn btn-success">
+                تحويل إلى فاتورة
+            </button>
 
+        @endif
     </div>
 
     {{-- بيانات البائع --}}
       <div class="border p-4 rounded bg-white text-center">
-    <h6 class="fw-bold mb-3">شركة فن  للطباعة والنشر</h6>
+    <h6 class="fw-bold mb-3">{{ getsetting('company_name') }}</h6>
 
     <div class="d-flex flex-wrap justify-content-center gap-4 text-muted small">
-        <div>📄 السجل التجاري: 254897632</div>
-        <div>🧾 الرقم الضريبي: 103569874</div>
-        <div>📞 الهاتف: 0100 123 4567</div>
-        <div>📧 البريد الإلكتروني: info@futureprint.com</div>
+        <div>📄 السجل التجاري: {{ getsetting('commercial_record') }}</div>
+        <div>🧾 الرقم الضريبي: {{ getsetting('tax_number') }}</div>
+        <div>📞 الهاتف: {{ getsetting('phone') }}</div>
+        <div>📧 البريد الإلكتروني: {{ getsetting('email') }}</div>
     </div>
 </div>
 </div>
@@ -258,6 +281,8 @@
     </div>
 </div>
 @endif
+
+
 
 
 </div>

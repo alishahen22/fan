@@ -20,6 +20,8 @@
             text-align: center;
         }
     </style>
+    <script src="//unpkg.com/alpinejs" defer></script>
+
             @livewireStyles
 
 </head>

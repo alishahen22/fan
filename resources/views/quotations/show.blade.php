@@ -77,16 +77,16 @@
 
 
     <div style="padding-top: 15px; font-size: 12px; direction: rtl; font-family: 'Vazirmatn', sans-serif;">
-        <h3 style="text-align: center; margin-bottom: 15px;">شركة فن للطباعة والنشر</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">{{ getsetting('company_name') }}</h3>
 
         <table style="width: 100%; table-layout: fixed; color: #555; " id="footer-table">
             <tr>
-                <td style="width: 50%; text-align: right;   border-style: none;"> السجل التجاري: 254897632</td>
-                <td style="width: 50%; text-align: right;   border-style: none;"> الرقم الضريبي: 103569874</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> السجل التجاري: {{ getsetting('commercial_record') }}</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الرقم الضريبي: {{ getsetting('tax_number') }}</td>
             </tr>
             <tr>
-                <td style="width: 50%; text-align: right;   border-style: none;"> الهاتف: 0100 123 4567</td>
-                <td style="width: 50%; text-align: right;   border-style: none;"> البريد الإلكتروني: info@futureprint.com</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الهاتف: {{ getsetting('phone') }}</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> البريد الإلكتروني: {{ getsetting('email') }}</td>
             </tr>
         </table>
     </div>

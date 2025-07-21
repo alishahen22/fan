@@ -34,11 +34,13 @@ class QuotationForm extends Component
     public $suppliesList  = [];
     public $selectedPrintServiceId;
     public $price_modifier_percentage = 0;
-    // public $discountValue = 0;
-    // public $adjustedSubtotal = 0;
-    // public $subtotal = 0;
-    // public $totalWithTax = 0;
+
     public $management_fee = 0;
+    public $showToast = false;
+    public $document_type  = 'quotation';
+    public $type = 'quotation'; // نوع المستند (عرض سعر أو فاتورة)
+    public $saveMessage = '';
+
 
 
     public function render()
@@ -46,14 +48,16 @@ class QuotationForm extends Component
         return view('livewire.quotation-form');
     }
 
-    public function mount()
+    public function mount($type= 'quotation')
     {
+        $this->type  = $type;
+        $this->document_type  = $type;
         $this->quotation_date = now()->format('Y-m-d');
-        $this->quotation_number = 'QT-' . rand(100000, 999999); // رقم عشوائي
+       $this->getNewQuotationNumber($type);
         $this->users = \App\Models\User::select('id', 'name')->get();
         $this->itemsList = \App\Models\Item::get();
         $this->suppliesList = \App\Models\Supply::get();
-        $this->tax = 15; // نسبة الضريبة 15%
+        $this->tax = getsetting('tax');
         $this->price_modifier_percentage = 20; // نسبة الرسوم الإدارية 20%
 
     }
@@ -86,7 +90,15 @@ class QuotationForm extends Component
             'newItem.quantity'      => 'required|integer|min:1',
             'newItem.supplies'      => 'nullable|array',
             'newItem.supplies.*'    => 'exists:supplies,id',
-        ]);
+         ] ,
+            [
+                'newItem.item_ids.required' => 'يرجى اختيار صنف واحد على الأقل.',
+                'newItem.description.required' => 'يرجى إدخال وصف للصنف.',
+                'newItem.input_width.required' => 'يرجى إدخال العرض.',
+                'newItem.input_height.required' => 'يرجى إدخال الارتفاع.',
+                'newItem.quantity.required' => 'يرجى إدخال الكمية.',
+            ]
+        );
 
           $printService = PrintService::create([
             'name_ar' => $this->newItem['description'],
@@ -171,14 +183,25 @@ class QuotationForm extends Component
 
     public function saveQuotation()
     {
+        $type = $this->document_type;
         $this->validate([
             'customer_name'      => 'required|string|max:255',
             'quotation_number'   => 'required|string|max:255|unique:quotations,number',
             'quotation_date'     => 'required|date',
-        ]);
+        ],
+            [
+                'customer_name.required' => 'يرجى إدخال اسم العميل.',
+                'quotation_number.required' => 'يرجى إدخال رقم عرض السعر.',
+                'quotation_date.required' => 'يرجى إدخال تاريخ عرض السعر.',
+            ]
+        );
 
         if (count($this->items) === 0) {
-            $this->addError('items', 'لا يمكن حفظ عرض السعر بدون أصناف.');
+            if ($type === 'quotation') {
+                session()->flash('error', '❌ لا يمكن حفظ عرض السعر بدون أصناف.');
+            } else {
+                session()->flash('error', '❌ لا يمكن حفظ الفاتورة بدون أصناف.');
+            }
             return;
         }
 
@@ -200,7 +223,7 @@ class QuotationForm extends Component
             'tax_percentage'            => $this->tax,
             'tax'                       => $taxAmount,
             'total'                     => $total,
-            'type'                      => 'quotation',
+            'type'                      =>  $type, // نوع العرض (عرض سعر أو فاتورة)
             'user_id'                   => $this->selected_user_id,
         ]);
         // حفظ العناصر
@@ -221,7 +244,14 @@ class QuotationForm extends Component
 
         // Reset
     // 🧼 Reset
-        $this->reset([
+
+
+        $this->items = []; // تأكيد يدوي
+
+        $this->subtotal = 0;
+        $this->taxNumber = 0;
+        $this->totalWithTax = 0;
+          $this->reset([
             'customer_name',
             'quotation_number',
             'tax_number',
@@ -231,16 +261,22 @@ class QuotationForm extends Component
             'showAddItemModal',
             'selected_user_id',
             'price_modifier_percentage',
+            'selectedPrintServiceId',
+
         ]);
+        //document type
+        $this->getNewQuotationNumber($this->type);
+            if ($this->document_type === 'quotation') {
+                $this->saveMessage = '✅ تم حفظ عرض السعر بنجاح!';
+            } else {
+                $this->saveMessage = '✅ تم حفظ الفاتورة بنجاح!';
+            }
+            $this->dispatch('toast-success');
+            $this->document_type = $this->type;
 
-        $this->items = []; // تأكيد يدوي
+        }
 
-        $this->subtotal = 0;
-        $this->taxNumber = 0;
-        $this->totalWithTax = 0;
-        $this->quotation_number = 'QT-' . rand(100000, 999999); // توليد رقم جديد تلقائي
 
-    }
 
 
 
@@ -280,8 +316,11 @@ class QuotationForm extends Component
           $this->saveQuotation();
         $quotation = Quotation::where('number', $quotation_number)->first();
         // Redirect to the print view
-        return redirect()->route('quotations.show', ['quotation' => $quotation->id])->with('print', true);
-
+        if ($quotation->type === 'invoice') {
+            return redirect()->route('invoices.pdf', ['invoice' => $quotation->id]);
+        } else {
+          return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+        }
     }
 
     public function saveAsPdf()
@@ -295,6 +334,35 @@ class QuotationForm extends Component
             return;
         }
         // Generate PDF
-        return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+        if ($quotation->type === 'invoice') {
+            return redirect()->route('invoices.pdf', ['invoice' => $quotation->id]);
+        } else {
+          return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+        }
+
+    }
+
+
+    public function convertToInvoice()
+    {
+
+        $this->document_type = 'invoice';
+        $this->getNewQuotationNumber('invoice');
+
+
+    }
+
+
+    //get new quotation number
+    public function getNewQuotationNumber($type)
+    {
+    $lastInvoice = \App\Models\Quotation::where('type', $type)->orderBy('id', 'desc')->first();
+        if ($type === 'invoice') {
+        $newInvoiceNumber = $lastInvoice ? 'INV-' . (explode('-', $lastInvoice->number)[1] + 1) : 'INV-1';
+        } else {
+        $newInvoiceNumber = $lastInvoice ? 'QT-' . (explode('-', $lastInvoice->number)[1] + 1) : 'QT-1';
+        }
+     //   dd($newInvoiceNumber);
+        $this->quotation_number = $newInvoiceNumber;
     }
 }

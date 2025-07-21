@@ -11,7 +11,7 @@
     @slot('title') {{ __('Add Quotation') }} @endslot
 @endcomponent
 
-    <livewire:quotation-form />
+<livewire:quotation-form :type="'quotation'" />
 
 @endsection
 
