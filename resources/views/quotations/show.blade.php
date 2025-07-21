@@ -25,6 +25,7 @@
                 <table class="table table-bordered text-center align-middle">
                     <thead class="table-light">
                         <tr>
+                            <th>#</th>
                             <th>الصنف</th>
                             <th>الكمية</th>
                             <th>السعر</th>
@@ -34,6 +35,7 @@
                     <tbody>
                         @foreach($quotation->items as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td class="text-start">
                                     {{ $item->description }}
                                     @if($item->supplies && count($item->supplies))
@@ -51,7 +53,7 @@
 
             <br>
 
-            <div class="text-end" style="max-width: 400px; margin-right: auto;">
+            <div class="text-end" style="max-width: 300px; margin-right: auto;">
                 <div class="d-flex justify-content-between mb-2">
                     <span><strong>الإجمالي:</strong></span>
                     <span>{{ number_format($quotation->subtotal, 2) }}&nbsp;ج.م</span>
@@ -73,11 +75,30 @@
         </div>
     </div>
 
-    <div class="mt-4 text-end">
-        <button onclick="window.print()" class="btn btn-primary no-print">
+
+    <div style="padding-top: 15px; font-size: 12px; direction: rtl; font-family: 'Vazirmatn', sans-serif;">
+        <h3 style="text-align: center; margin-bottom: 15px;">شركة فن للطباعة والنشر</h3>
+
+        <table style="width: 100%; table-layout: fixed; color: #555; " id="footer-table">
+            <tr>
+                <td style="width: 50%; text-align: right;   border-style: none;"> السجل التجاري: 254897632</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الرقم الضريبي: 103569874</td>
+            </tr>
+            <tr>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الهاتف: 0100 123 4567</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> البريد الإلكتروني: info@futureprint.com</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+
+    <div class="mt-4 text-end no-print">
+        <button onclick="window.print()" class="btn btn-primary ">
             🖨️ طباعة
         </button>
-        <button onclick="printPDF()" class="btn btn-outline-primary">📄 تحميل PDF</button>
+        <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-primary">📄 تحميل PDF</a>
 
     </div>
 </div>

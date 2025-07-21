@@ -283,4 +283,18 @@ class QuotationForm extends Component
         return redirect()->route('quotations.show', ['quotation' => $quotation->id])->with('print', true);
 
     }
+
+    public function saveAsPdf()
+    {
+        $quotation_number = $this->quotation_number;
+        $this->saveQuotation();
+        $quotation = Quotation::where('number', $quotation_number)->first();
+
+        if (!$quotation) {
+            session()->flash('error', '❌ لم يتم العثور على عرض السعر.');
+            return;
+        }
+        // Generate PDF
+        return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+    }
 }

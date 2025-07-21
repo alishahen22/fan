@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Mpdf\Mpdf;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -28,13 +29,21 @@ class QuotationController extends Controller
     }
 
     //generate PDF
-  public function generatePdf(Quotation $quotation)
-{
-    $pdf = Pdf::loadView('quotations.pdf', compact('quotation'))
-        ->setPaper('a4');
+   public function generatePdf(Quotation $quotation)
+    {
+        $html = view('quotations.pdf', compact('quotation'))->render();
 
-    return $pdf->download("QT-{$quotation->number}.pdf");
-}
+        $mpdf = new Mpdf([
+            'default_font' => 'dejavusans',
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'P',
+            'tempDir' => storage_path('app/temp'), // مهم لتفادي أخطاء
+        ]);
+
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output("quotation-{$quotation->number}.pdf", 'D'); // or 'I' to open in browser
+    }
 
 
 

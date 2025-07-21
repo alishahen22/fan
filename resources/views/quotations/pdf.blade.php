@@ -3,132 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @font-face {
-            font-family: 'Vazirmatn';
-            font-style: normal;
-            font-weight: 400;
-            src: url('{{ storage_path('fonts/Vazirmatn-Regular.ttf') }}') ;
-        }
-      
-        body, #print-area {
-            font-family: 'Vazirmatn', sans-serif;
+        body {
+            font-family: 'dejavu sans', sans-serif;
             direction: rtl;
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
             margin: 0;
             padding: 30px;
         }
 
-        .card {
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 20px;
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
-        .card-header, .card-body {
-            margin-bottom: 20px;
+        .info-box {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .info-box div {
+            margin-bottom: 5px;
+            min-width: 200px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px 0;
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 8px 10px;
+            padding: 8px;
             text-align: center;
         }
 
-        .text-end {
-            text-align: left;
+        .totals {
+            width: 200px;
+            float: left;
+            margin-top: 20px;
         }
 
-        .fw-bold {
-            font-weight: bold;
+        .totals div {
+            border: 1px solid #000;
+            padding: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        .text-success {
-            color: green;
+        .footer-buttons {
+            margin-top: 60px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 12px;
         }
 
-        #total {
-            font-size: 16px;
+        .footer-buttons {
+            margin-top: 60px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 12px;
         }
+
+
     </style>
 </head>
 <body>
-<div id="print-area">
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>عرض السعر رقم: {{ $quotation->number }}</h4>
-            <span>{{ \Carbon\Carbon::parse($quotation->date)->format('Y-m-d') }}</span>
-        </div>
+    <div class="title">عرض سعر</div>
 
-        <div class="card-body">
-
-            <div>
-                <h5>معلومات العميل:</h5>
-                <div style="display: flex; justify-content: space-between;">
-                    <div><strong>الاسم:</strong> {{ $quotation->customer_name }}</div>
-                    <div><strong>السجل التجاري:</strong> {{ $quotation->commercial_record }}</div>
-                    <div><strong>الرقم الضريبي:</strong> {{ $quotation->tax_number }}</div>
-                </div>
-            </div>
-
-            <h5 style="margin-top: 30px;">تفاصيل الأصناف:</h5>
-            <table>
-                <thead>
-                    <tr>
-                        <th>الصنف</th>
-                        <th>الكمية</th>
-                        <th>السعر</th>
-                        <th>الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($quotation->items as $item)
-                        <tr>
-                            <td style="text-align: right;">
-                                {{ $item->description }}
-                                @if($item->supplies && count($item->supplies))
-                                    <br><small>المستلزمات: {{ implode('، ', $item->supplies) }}</small>
-                                @endif
-                            </td>
-                            <td>{{ $item->quantity }}</td>
-                            <td>{{ number_format($item->price, 2) }} ج.م</td>
-                            <td class="fw-bold">{{ number_format($item->total_price, 2) }} ج.م</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <br>
-
-            <div class="text-end" style="max-width: 400px; margin-right: auto;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span><strong>الإجمالي:</strong></span>
-                    <span>{{ number_format($quotation->subtotal, 2) }} ج.م</span>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span><strong>الضريبة ({{ $quotation->tax_percentage }}%):</strong></span>
-                    <span>{{ number_format($quotation->tax, 2) }} ج.م</span>
-                </div>
-
-                <hr>
-
-                <div style="display: flex; justify-content: space-between;" class="fw-bold text-success" id="total">
-                    <span>الإجمالي النهائي:</span>
-                    <span>{{ number_format($quotation->total, 2) }} ج.م</span>
-                </div>
-            </div>
-
-        </div>
+    <div class="info-box">
+        <div><strong>اسم العميل:</strong> {{ $quotation->customer_name }}</div>
+        <div><strong>التاريخ:</strong> {{ $quotation->date }}</div>
+        <div><strong>الرقم:</strong> {{ $quotation->number }}</div>
+        <div><strong>الرقم الضريبي:</strong> {{ $quotation->tax_number }}</div>
+        <div><strong>السجل التجاري:</strong> {{ $quotation->commercial_record }}</div>
     </div>
 
-</div>
+    <div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>السعر</th>
+                <th>الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($quotation->items as $index => $item)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>
+                        {{ $item->description }}
+                        @if($item->supplies && count($item->supplies))
+                            <br><small>المستلزمات: {{ implode('، ', $item->supplies) }}</small>
+                        @endif
+                    </td>
+                    <td>{{ $item->quantity }}</td>
+                    <td>{{ number_format($item->price, 2) }} ج.م</td>
+                    <td>{{ number_format($item->total_price, 2) }} ج.م</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div><span>الإجمالي </span><span>{{ number_format($quotation->subtotal, 2) }} ج.م</span></div>
+        <div><span>الضريبة </span><span>{{ number_format($quotation->tax, 2) }} ج.م</span></div>
+        <div><strong>المطلوب </strong><strong>{{ number_format($quotation->total, 2) }} ج.م</strong></div>
+    </div>
+    </div>
+
+<footer name="myfooter">
+    <div style="padding-top: 15px; font-size: 12px; direction: rtl; font-family: 'Vazirmatn', sans-serif;">
+        <h3 style="text-align: center; margin-bottom: 15px;">شركة فن للطباعة والنشر</h3>
+
+        <table style="width: 100%; table-layout: fixed; color: #555; " id="footer-table">
+            <tr>
+                <td style="width: 50%; text-align: right;   border-style: none;"> السجل التجاري: 254897632</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الرقم الضريبي: 103569874</td>
+            </tr>
+            <tr>
+                <td style="width: 50%; text-align: right;   border-style: none;"> الهاتف: 0100 123 4567</td>
+                <td style="width: 50%; text-align: right;   border-style: none;"> البريد الإلكتروني: info@futureprint.com</td>
+            </tr>
+        </table>
+    </div>
+</footer>
+
+
+
+
 </body>
 </html>

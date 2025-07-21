@@ -1,14 +1,15 @@
 <?php
 
 
+use App\Models\User;
 use App\Models\Setting;
+use App\Models\Voucher;
+use \App\Models\UserPoint;
+use Illuminate\Support\Str;
+use App\Models\PointSetting;
+use App\Models\PrintSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use App\Models\PointSetting;
-use App\Models\User;
-use \App\Models\UserPoint;
-use App\Models\Voucher;
-use Illuminate\Support\Str;
 
 // Status Codes
 function user_id()
@@ -300,5 +301,9 @@ function loadArrayDirectory(string $path): array
 
 
 
+function getSetting($key)
+{
+    $setting = PrintSetting::where('key', $key)->first()['value'];
 
-
+    return $setting;
+}

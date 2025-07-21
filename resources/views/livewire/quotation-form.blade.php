@@ -147,7 +147,7 @@
 
     {{-- الأزرار --}}
     <div class="d-flex justify-content-center flex-wrap gap-3 mb-4">
-        <button class="btn btn-outline-dark" wire:click="sendEmail">إرسال للعميل إيميل أو في ملفه</button>
+        {{-- <button class="btn btn-outline-dark" wire:click="sendEmail">إرسال للعميل إيميل أو في ملفه</button> --}}
         <button class="btn btn-outline-dark" wire:click="saveAsPdf">pdf حفظ</button>
         <button class="btn btn-outline-dark" wire:click="printQuotation">طباعة</button>
         <button wire:click="saveQuotation" class="btn btn-outline-dark">💾 حفظ عرض السعر</button>
