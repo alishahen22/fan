@@ -11,6 +11,12 @@ use App\Models\PrintSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+
+
+
+
 // Status Codes
 function user_id()
 {
@@ -306,4 +312,34 @@ function getSetting($key)
     $setting = PrintSetting::where('key', $key)->first()['value'];
 
     return $setting;
+}
+
+
+
+if (!function_exists('generate_zatca_qr')) {
+    function generate_zatca_qr(array $invoiceData): string
+    {
+        $qrString = generateTLVString($invoiceData);
+
+        $qrCode = new QrCode($qrString);
+        $qrCode->setSize(300);
+        $qrCode->setMargin(10);
+
+        $writer = new PngWriter();
+        return $writer->write($qrCode)->getString();
+    }
+}
+
+if (!function_exists('generateTLVString')) {
+    function generateTLVString(array $data): string
+    {
+        $tlv = '';
+        $tlv .= pack("H*", '01') . chr(strlen($data['seller_name'])) . $data['seller_name'];
+        $tlv .= pack("H*", '02') . chr(strlen($data['vat_number'])) . $data['vat_number'];
+        $tlv .= pack("H*", '03') . chr(strlen($data['invoice_date'])) . $data['invoice_date'];
+        $tlv .= pack("H*", '04') . chr(strlen($data['total_with_vat'])) . $data['total_with_vat'];
+        $tlv .= pack("H*", '05') . chr(strlen($data['vat_amount'])) . $data['vat_amount'];
+
+        return base64_encode($tlv);
+    }
 }

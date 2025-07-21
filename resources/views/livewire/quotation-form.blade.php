@@ -56,7 +56,7 @@
 </div>
 
 <div class="mb-3">
-    <label class="form-label fw-bold"/>اختر صنف جاهز</label>
+    <label class="form-label fw-bold">اختر صنف جاهز</label>
  <select wire:change="loadPrintServiceInfo($event.target.value)" wire:model="selectedPrintServiceId" class="form-select">
     <option value="">— اختر —</option>
     @foreach(\App\Models\PrintService::where('hidden', false)->withCount('items')->get() as $service)

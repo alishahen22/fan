@@ -10,6 +10,9 @@ class Quotation extends Model
     use HasFactory;
     protected $guarded = [];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
     public function items()
     {
         return $this->hasMany(QuotationItem::class);
@@ -19,4 +22,6 @@ class Quotation extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
 }

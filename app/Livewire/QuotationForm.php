@@ -317,9 +317,9 @@ class QuotationForm extends Component
         $quotation = Quotation::where('number', $quotation_number)->first();
         // Redirect to the print view
         if ($quotation->type === 'invoice') {
-            return redirect()->route('invoices.pdf', ['invoice' => $quotation->id]);
+            return redirect()->route('invoices.show', ['invoice' => $quotation->id])->with('print' , true);
         } else {
-          return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+          return redirect()->route('quotations.show', ['quotation' => $quotation->id])->with('print' , true);
         }
     }
 

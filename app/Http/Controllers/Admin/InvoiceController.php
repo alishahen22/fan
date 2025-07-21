@@ -4,50 +4,76 @@ namespace App\Http\Controllers\Admin;
 
 use Mpdf\Mpdf;
 use Carbon\Carbon;
+use App\Models\invoice;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
+        use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
-class QuotationController extends Controller
+use Endroid\QrCode\Response\QrCodeResponse;
+
+
+class InvoiceController extends Controller
 {
     public function index()
     {
-        return view('quotations.list', [
+        return view('invoices.list', [
             'columns' => $this->columns()
         ]);
     }
 
     public function create()
     {
-        return view('quotations.create');
+        return view('invoices.create');
     }
 
    //show
     public function show($id)
     {
-        $quotation = Quotation::with('items')->where(   'id', $id)->where('type' , 'quotation')->firstOrFail();
-        return view('quotations.show', compact('quotation'));
+        $invoice = Quotation::with('items')->where('id', $id)->where('type', 'invoice')->firstOrFail();
+
+        $qrCode = generate_zatca_qr([
+                'seller_name' => getsetting('company_name'),
+                'vat_number' => getsetting('tax_number'),
+                'invoice_date' => \Carbon\Carbon::parse($invoice->date)->format('Y-m-d\TH:i:s\Z'),
+                'total_with_vat' => $invoice->total,
+                'vat_amount' => $invoice->tax
+    ]);
+        return view('invoices.show', compact('invoice' , 'qrCode'));
     }
 
     //generate PDF
    public function generatePdf($id)
     {
 
-        $quotation = Quotation::with('items')->where('id', $id)->where('type', 'quotation')->firstOrFail();
-        $html = view('quotations.pdf', compact('quotation'))->render();
+        $invoice = Quotation::with('items')->where('id', $id)->where('type', 'invoice')->firstOrFail();
 
-        $mpdf = new Mpdf([
-            'default_font' => 'dejavusans',
-            'mode' => 'utf-8',
+            $qrCode = generate_zatca_qr([
+                'seller_name' => getsetting('company_name'),
+                'vat_number' => getsetting('tax_number'),
+                'invoice_date' => \Carbon\Carbon::parse($invoice->date)->format('Y-m-d\TH:i:s\Z'),
+                'total_with_vat' => $invoice->total,
+                'vat_amount' => $invoice->tax
+    ]);
+        $html = view('invoices.pdf', compact('invoice', 'qrCode'))->render();
+
+       $mpdf = new Mpdf([
+             'mode' => 'utf-8',
             'format' => 'A4',
-            'orientation' => 'P',
-            'tempDir' => storage_path('app/temp'), // مهم لتفادي أخطاء
+            'direction' => 'rtl',
+            'margin_top' => 20,
+            'margin_right' => 15,
+            'margin_left' => 15,
+            'margin_bottom' => 20,
         ]);
 
+        $mpdf->SetDirectionality('rtl');
         $mpdf->WriteHTML($html);
-        return $mpdf->Output("quotation-{$quotation->number}.pdf", 'D'); // or 'I' to open in browser
+
+        return $mpdf->Output('invoice_'.$invoice->number.'.pdf', 'D');// or 'I' to open in browser
     }
 
 
@@ -59,7 +85,7 @@ class QuotationController extends Controller
             ->addColumn('action', function ($row) {
                 return '<ul class="list-inline hstack gap-2 mb-0">'
                 //show
-                    . '<li class="list-inline-item"><a class="text-primary d-inline-block"  href="' . route('quotations.show', $row->id) . '"><i class="ri-eye-fill fs-16"></i></a></li>'
+                    . '<li class="list-inline-item"><a class="text-primary d-inline-block"  href="' . route('invoices.show', $row->id) . '"><i class="ri-eye-fill fs-16"></i></a></li>'
                     . '<li class="list-inline-item"><a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal"><i class="ri-delete-bin-5-fill fs-16"></i></a></li>'
                     . '</ul>';
             })
@@ -75,7 +101,7 @@ class QuotationController extends Controller
 
     public function filter(Request $request)
     {
-        $query = Quotation::where('type', 'quotation')
+        $query = Quotation::where('type', 'invoice')
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
                 $searchKey = $request->search_key;
                 return $query->where(function ($query) use ($searchKey) {
