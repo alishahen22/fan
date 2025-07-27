@@ -36,7 +36,7 @@
                         </div>
 
 
-                    
+
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label">@lang('Price')</label>
@@ -45,7 +45,7 @@
                             </div>
                         </div>
 
-                       
+
 
                         <div class="col-md-4">
                             <div class="mb-3">
@@ -71,6 +71,7 @@
     <script src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/form-validation.init.js') }}"></script>
     <script src="{{ URL::asset('build/js/pages/form-validation.init.js') }}"></script>
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
     <script>
         $('.dropify').dropify({

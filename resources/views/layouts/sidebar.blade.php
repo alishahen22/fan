@@ -47,6 +47,8 @@
 
                 {{--                @endpermission--}}
                 {{--                @permission('users_list')--}}
+                @if(auth()->user()->type == 'admin')
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('users.*') ? 'active' : '' }}"
                        href="{{ route('users.index') }}">
@@ -184,7 +186,64 @@
                             @endif
                     </a>
                 </li>
+                @endif
 
+                {{--  --}}
+                @if (auth()->user()->type == 'admin' || auth()->user()->type == 'printer')
+
+            <li class="nav-item">
+                <a class="nav-link menu-link {{ Request::routeIs('items.*') || Request::routeIs('supplies.*') || Request::routeIs('print-services.*') || Request::routeIs('quotations.*') || Request::routeIs('invoices.*') || Request::routeIs('packages.*') || Request::routeIs('printSettings.*') ? 'active' : '' }}"
+                href="#sidebarStaticPages" data-bs-toggle="collapse" role="button"
+                aria-expanded="{{ Request::routeIs('items.*') || Request::routeIs('supplies.*') || Request::routeIs('print-services.*') || Request::routeIs('quotations.*') || Request::routeIs('invoices.*') || Request::routeIs('packages.*') || Request::routeIs('printSettings.*') }}"
+                aria-controls="sidebarStaticPages">
+                    <i class="ri-pages-line"></i> <span>@lang('قائمة التسعير')</span>
+                </a>
+                <div class="menu-dropdown collapse {{ Request::routeIs('items.*') || Request::routeIs('supplies.*') || Request::routeIs('print-services.*') || Request::routeIs('quotations.*') || Request::routeIs('invoices.*') || Request::routeIs('packages.*') || Request::routeIs('printSettings.*') ? 'show' : '' }}"
+                    id="sidebarStaticPages">
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('items.index') }}" class="nav-link {{ Request::routeIs('items.*') ? 'active' : '' }}">
+                                @lang('تكويد المواد الخام')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('supplies.index') }}" class="nav-link {{ Request::routeIs('supplies.*') ? 'active' : '' }}">
+                                @lang('تكويد المستلزمات')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('print-services.index') }}" class="nav-link {{ Request::routeIs('print-services.*') ? 'active' : '' }}">
+                                @lang('تكويد اصناف')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('quotations.index') }}" class="nav-link {{ Request::routeIs('quotations.*') ? 'active' : '' }}">
+                                @lang('عرض سعر')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('invoices.index') }}" class="nav-link {{ Request::routeIs('invoices.*') ? 'active' : '' }}">
+                                @lang('الفاتورة')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('packages.index') }}" class="nav-link {{ Request::routeIs('packages.*') ? 'active' : '' }}">
+                                @lang('الباقات')
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('printSettings.edit') }}" class="nav-link {{ Request::routeIs('printSettings.*') ? 'active' : '' }}">
+                                @lang('إعدادات الطباعة')
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+                @endif
+
+                @if(auth()->user()->type == 'admin' )
+                {{--  --}}
                 {{--                @endpermission--}}
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-components">الإعدادات</span></li>
                 {{--                @permission('pages_update')--}}
@@ -218,6 +277,8 @@
                 {{--                            <i class="ri-lock-2-fill"></i> <span>@lang('Roles & Permissions')</span>--}}
                 {{--                        </a>--}}
                 {{--                    </li>--}}
+
+
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('admins.*') ? 'active' : '' }}"
                        href="{{ route('admins.index') }}">
@@ -240,6 +301,7 @@
                         </a>
                     </li>
 {{--                @endpermission--}}
+                    @endif
 
             </ul>
             <br>

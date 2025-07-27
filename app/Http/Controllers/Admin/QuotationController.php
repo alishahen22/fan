@@ -14,8 +14,10 @@ class QuotationController extends Controller
 {
     public function index()
     {
+
+
         return view('quotations.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -36,7 +38,13 @@ class QuotationController extends Controller
     {
 
         $quotation = Quotation::with('items')->where('id', $id)->where('type', 'quotation')->firstOrFail();
-        $html = view('quotations.pdf', compact('quotation'))->render();
+
+        $logoPath = public_path('storage/' . getsetting('logo'));
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logoPath));
+        }
+        $html = view('quotations.pdf', compact('quotation', 'logoBase64'))->render();
 
         $mpdf = new Mpdf([
             'default_font' => 'dejavusans',
@@ -52,26 +60,26 @@ class QuotationController extends Controller
 
 
         public function getData(Request $request)
-    {
-        return DataTables::eloquent($this->filter($request))
-            ->addIndexColumn()
+        {
+            return DataTables::eloquent($this->filter($request))
+                ->addIndexColumn()
 
-            ->addColumn('action', function ($row) {
-                return '<ul class="list-inline hstack gap-2 mb-0">'
-                //show
-                    . '<li class="list-inline-item"><a class="text-primary d-inline-block"  href="' . route('quotations.show', $row->id) . '"><i class="ri-eye-fill fs-16"></i></a></li>'
-                    . '<li class="list-inline-item"><a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal"><i class="ri-delete-bin-5-fill fs-16"></i></a></li>'
-                    . '</ul>';
-            })
+                ->addColumn('action', function ($row) {
+                    return '<ul class="list-inline hstack gap-2 mb-0">'
+                    //show
+                        . '<li class="list-inline-item"><a class="text-primary d-inline-block"  href="' . route('quotations.show', $row->id) . '"><i class="ri-eye-fill fs-16"></i></a></li>'
+                        . '<li class="list-inline-item"><a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal"><i class="ri-delete-bin-5-fill fs-16"></i></a></li>'
+                        . '</ul>';
+                })
 
-            // تعديل تنسيق تاريخ الإنشاء
-               ->editColumn('date', fn($row) => Carbon::parse($row->date)->format('Y-m-d'))
+                // تعديل تنسيق تاريخ الإنشاء
+                ->editColumn('date', fn($row) => Carbon::parse($row->date)->format('Y-m-d'))
 
-            // تحديد الأعمدة اللي فيها HTML
-            ->rawColumns(['action'])
+                // تحديد الأعمدة اللي فيها HTML
+                ->rawColumns(['action'])
 
-            ->make();
-    }
+                ->make();
+        }
 
     public function filter(Request $request)
     {
@@ -105,4 +113,33 @@ class QuotationController extends Controller
     }
 
 
+    // تحويل إلى فاتورة
+    public function convertToInvoice($id)
+    {
+
+        $quotation = Quotation::findOrFail($id);
+        if ($quotation->type !== 'quotation') {
+            return redirect()->back()->with('error', __('هذا العرض ليس عرض سعر صالح للتحويل إلى فاتورة.'));
+        }
+        $lastInvoice = \App\Models\Quotation::where('type', 'invoice')->orderBy('id', 'desc')->first();
+
+        $newInvoiceNumber = $lastInvoice ? 'INV-' . (explode('-', $lastInvoice->number)[1] + 1) : 'INV-1';
+        //ckeck if newInvoiceNumber exists
+        if (Quotation::where('number', $newInvoiceNumber)->exists()) {
+            // إذا كان الرقم موجودًا بالفعل، يمكننا استخدام رقم جديد
+            $newInvoiceNumber = 'INV-' . (explode('-', $newInvoiceNumber)[1] + 1);
+        }
+        $quotation->type = 'invoice';
+        $quotation->number = $newInvoiceNumber;
+        $quotation->save();
+
+        return redirect()->route('invoices.show', $id)->with('success', __('تم تحويل عرض السعر إلى فاتورة بنجاح.'));
+    }
+
+
+       public function destroy($id)
+        {
+            Quotation::findOrFail($id)->delete();
+            return redirect()->route('quotations.index')->with('success', __('Deleted successfully'));
+        }
 }

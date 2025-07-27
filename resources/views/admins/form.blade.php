@@ -63,6 +63,15 @@
                                    placeholder="@lang('translation.Enter confirm password')">
                             <div class="invalid-feedback">@lang('translation.Please Enter a value')</div>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="type" class="form-label">@lang('translation.Select Type')</label>
+                            <select id="type" class="form-select" name="type" required>
+                                <option value="" selected disabled>@lang('translation.Select Type')</option>
+                                <option value="admin" {{ isset($admin) && $admin->type == 'admin' ? 'selected' : '' }}>@lang('مسؤول عام')</option>
+                                <option value="printer" {{ isset($admin) && $admin->type == 'printer' ? 'selected' : '' }}>@lang('مسؤول الطباعة')</option>
+                            </select>
+
                     </div>
                     <!-- end card body -->
                 </div>

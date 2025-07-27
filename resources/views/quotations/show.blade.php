@@ -1,5 +1,5 @@
 @extends('layouts.master')
-
+   @section('title') {{ __('Quotation Details') }} @endsection
 @section('content')
 <div class="container my-5" id="print-area">
 
@@ -19,6 +19,8 @@
                     <div class="col-md-4"><strong>{{ __('الرقم الضريبي') }}:</strong> {{ $quotation->tax_number }}</div>
                 </div>
             </div>
+
+
 
             <h5 class="mb-3">{{ __('تفاصيل الأصناف') }}:</h5>
             <div class="table-responsive">
@@ -76,7 +78,9 @@
     </div>
 
     <div style="padding-top: 15px; font-size: 12px; direction: rtl; font-family: 'Vazirmatn', sans-serif;">
-        <h3 style="text-align: center; margin-bottom: 15px;">{{ getsetting('company_name') }}</h3>
+
+
+                <h3 style="text-align: center; margin-bottom: 15px;">{{ getsetting('company_name') }}</h3>
 
         <table style="width: 40%; table-layout: fixed; color: #555; margin: 0 auto;" id="footer-table">
             <tr>
@@ -88,14 +92,25 @@
                 <td style="width: 50%; text-align: right; border-style: none;">{{ __('البريد الإلكتروني') }}: {{ getsetting('email') }}</td>
             </tr>
         </table>
+
+          <div style="margin-bottom: 10px;">
+            <img src="{{ asset('storage/' . getsetting('logo')) }}" alt="Logo" style="width:150px;">
+        </div>
     </div>
 
 </div>
 
-<div class="mt-4 text-end no-print">
-    <button onclick="window.print()" class="btn btn-primary">🖨️ {{ __('طباعة') }}</button>
-    <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-primary">📄 {{ __('تحميل PDF') }}</a>
-</div>
+
+    <div class="d-flex justify-content-center flex-wrap gap-3 mb-4 no-print">
+
+        <a href="{{ route('quotations.pdf', $quotation->id) }}"  class="btn btn-outline-dark no-print">pdf تحميل</a>
+        <button onclick="window.print()" class="btn btn-outline-dark no-print" >طباعة</button>
+
+            <a href="{{ route('quotations.convertToInvoice', $quotation->id) }}" class="btn btn-outline-dark no-print">
+                تحويل إلى فاتورة
+            </a>
+
+    </div>
 @endsection
 
 @section('css')
@@ -168,6 +183,8 @@
 @endsection
 
 @section('script')
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
 @if(session('print'))
 <script>
     window.onload = function () {

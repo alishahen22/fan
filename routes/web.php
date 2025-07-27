@@ -65,7 +65,7 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
         Route::get('/product_attribute_options/data/{id}', [\App\Http\Controllers\Admin\ProductAttributeOptionsController::class, 'getData'])->name('product_attribute_options.data');
 
 //        users
-        Route::resource('/users', \App\Http\Controllers\Admin\UsersController::class)->names('users');
+    Route::resource('/users', \App\Http\Controllers\Admin\UsersController::class)->names('users');
         Route::get('/users/get/data', [\App\Http\Controllers\Admin\UsersController::class, 'getData'])->name('users.data');
         Route::post('/users/changeStatus', [\App\Http\Controllers\Admin\UsersController::class, 'changeStatus'])->name('users.changeStatus');
 //        Route::get('/users/orders/data/{userId}', [\App\Http\Controllers\Admin\UsersOrdersController::class, 'getData'])->name('users.orders.data');
@@ -211,7 +211,15 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
     Route::post('/admins/changeStatus', [\App\Http\Controllers\Admin\AdminsController::class, 'changeStatus'])->name('admins.changeStatus');
 
 
-    Route::resource('/items', \App\Http\Controllers\Admin\ItemsController::class)->names('items')->except('show');
+
+
+
+
+});
+
+//middleware group printer
+Route::middleware(['admin', 'printer'])->group(function () {
+      Route::resource('/items', \App\Http\Controllers\Admin\ItemsController::class)->names('items')->except('show');
 
     Route::get('/items/data', [\App\Http\Controllers\Admin\ItemsController::class, 'getData'])->name('items.data');
 
@@ -243,15 +251,32 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
 
     Route::get('/quotations/data', [\App\Http\Controllers\Admin\QuotationController::class, 'getData'])->name('quotations.data');
     Route::get('/quotations/{quotation}/pdf', [\App\Http\Controllers\Admin\QuotationController::class, 'generatePdf'])->name('quotations.pdf');
+    //convertToInvoice
+    Route::get('/quotations/{quotation}/convertToInvoice', [\App\Http\Controllers\Admin\QuotationController::class, 'convertToInvoice'])->name('quotations.convertToInvoice');
     Route::resource('/quotations', \App\Http\Controllers\Admin\QuotationController::class);
 
     Route::get('/invoices/data', [\App\Http\Controllers\Admin\InvoiceController::class, 'getData'])->name('invoices.data');
     Route::get('/invoices/{invoice}/pdf', [\App\Http\Controllers\Admin\InvoiceController::class, 'generatePdf'])->name('invoices.pdf');
     Route::resource('/invoices', \App\Http\Controllers\Admin\InvoiceController::class);
     //PrintService
+
+    Route::get('/print-services/data', [\App\Http\Controllers\Admin\PrintServiceController::class, 'getData'])->name('print-services.data');
+
+    Route::post('/print-services/bulkDelete', [\App\Http\Controllers\Admin\PrintServiceController::class, 'bulkDelete'])->name('print-services  .bulkDelete');
+
+    Route::post('/print-services/bulkChangeStatus', [\App\Http\Controllers\Admin\PrintServiceController::class, 'bulkChangeStatus'])->name('print-services.bulkChangeStatus');
     Route::resource('/print-services', \App\Http\Controllers\Admin\PrintServiceController::class)->names('print-services')->except('show');
 
+
+    Route::get('/print-settings/edit', [\App\Http\Controllers\Admin\PrintSettingsController::class, 'edit'])->name('printSettings.edit');
+    Route::post('/print-settings/update', [\App\Http\Controllers\Admin\PrintSettingsController::class, 'update'])->name('printSettings.update');
+
+
+    Route::get('/packages/data', [\App\Http\Controllers\Admin\PackageController::class, 'getData'])->name('packages.data');
+    Route::resource('/packages', \App\Http\Controllers\Admin\PackageController::class)->names('packages')->except('show');
 });
+
+
 
 Route::get('/sendNotification', function () {
     dd(sendNotification('f8Po2qOxpETJlNj3MiuQ6E:APA91bGZr1njZQ1mrwBpnSP2_l82Cdf7KBvn70IkeH8H9jaSmU2SOqYEk8RQoRO8Vs3yimSpwZc3qOL9jqO0EHqbTW_l4B6A4HEV77LydKtIowNyqApLSI0i5_OhH2YNT-zPZBDKjQgr', 'new notification', 'test message', 'general'));

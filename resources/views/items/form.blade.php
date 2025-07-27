@@ -101,6 +101,7 @@
 @endsection
 @section('script')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
     <script src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/form-validation.init.js') }}"></script>

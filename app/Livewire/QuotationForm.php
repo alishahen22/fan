@@ -40,6 +40,7 @@ class QuotationForm extends Component
     public $document_type  = 'quotation';
     public $type = 'quotation'; // نوع المستند (عرض سعر أو فاتورة)
     public $saveMessage = '';
+    public $selectKey = 0; // مفتاح لتحديث المستخدم المختار
 
 
 
@@ -58,21 +59,43 @@ class QuotationForm extends Component
         $this->itemsList = \App\Models\Item::get();
         $this->suppliesList = \App\Models\Supply::get();
         $this->tax = getsetting('tax');
-        $this->price_modifier_percentage = 20; // نسبة الرسوم الإدارية 20%
+        // $this->price_modifier_percentage = 20; // نسبة الرسوم الإدارية 20%
 
     }
 
    public function loadUserInfo()
     {
+
+        //reset error if exists
+        $this->resetErrorBag('customer_name');
          if ($this->selected_user_id) {
             $user = \App\Models\User::find($this->selected_user_id);
             $this->tax_number = $user->tax_number ?? 'لا يوجد';
-            $this->commercial_record = $user->commercial_record ?? ' لا يوجد';
+            $this->commercial_record = $user->commercial_register ?? ' لا يوجد';
             $this->customer_name = $user->name;
         } else {
             $this->tax_number = '';
             $this->commercial_record = '';
             $this->customer_name = '';
+        }
+        if ($user && $user->discount != 0) {
+             $this->price_modifier_percentage = $user->discount;
+        } else {
+          $query = Quotation::where('type' , 'invoice')
+            ->where('user_id', $this->selected_user_id);
+
+        $period = getsetting('tax_calculation_period');
+            if ($period === 'yearly') {
+                $query->whereYear('date', now()->year);
+            } elseif ($period === 'monthly') {
+                $query->whereYear('date', now()->year)
+                    ->whereMonth('date', now()->month);
+            }
+
+            // احسب المجموع الإجمالي للفواتير
+           $invoices_prices = $query->sum('total');
+            $package = \App\Models\Package::getPackageByAmount($invoices_prices);
+            $this->price_modifier_percentage = $package ? $package->fee : 0;
         }
     }
 
@@ -81,6 +104,11 @@ class QuotationForm extends Component
 
     public function addItem()
     {
+        //check if customer_name is empty
+        if (empty($this->customer_name)) {
+            $this->addError('customer_name','❌ يرجى إدخال اسم العميل قبل إضافة الأصناف.');
+            return;
+        }
         $this->validate([
             'newItem.item_ids'      => 'required|array|min:1',
             'newItem.item_ids.*'    => 'exists:items,id',
@@ -112,16 +140,21 @@ class QuotationForm extends Component
         $printService->items()->sync($this->newItem['item_ids']?? []);
         $printService->supplies()->sync($this->newItem['supplies'] ?? []);
 
-        $basePrice = $printService->item_price;
-        $adjustedPrice = round($basePrice + ($basePrice * ($this->price_modifier_percentage / 100)), 2);
-        $totalPrice = round($adjustedPrice * $printService->quantity, 2);
+        // $basePrice = $printService->item_price;
+        // $adjustedPrice = round($basePrice + ($basePrice * ($this->price_modifier_percentage / 100)), 2);
+        // $totalPrice = round($adjustedPrice * $printService->quantity, 2);
+
+
+        $item_price = $printService->item_price + ($printService->item_price * ($this->price_modifier_percentage / 100));
+        $totalPrice = $printService->total_price + ($printService->total_price * ($this->price_modifier_percentage / 100));
 
         $this->items[] = [
+            'print_service_id' => $printService->id, // حفظ ID الخدمة للطباعة
             'names'       => $printService->items->pluck('name_ar')->toArray(),
             'description' => $printService->name_ar,
             'supplies'    => $printService->supplies->pluck('name_ar')->toArray(),
             'quantity'    => $printService->quantity,
-            'price'       => $adjustedPrice, // سعر شامل الزيادة
+            'price'       => $item_price, // سعر شامل الزيادة
             'total_price' => $totalPrice,    // الإجمالي شامل الزيادة
         ];
 
@@ -148,6 +181,10 @@ class QuotationForm extends Component
 
     public function openAddItemModal()
     {
+        if (empty($this->customer_name)) {
+            $this->addError('customer_name','❌ يرجى إدخال اسم العميل قبل إضافة الأصناف.');
+            return;
+        }
         $this->newItem = [
             'item_id' => '',
             'description' => '',
@@ -161,6 +198,7 @@ class QuotationForm extends Component
 
         $this->showAddItemModal = true;
     }
+
 
 
    public function getSubtotalProperty()
@@ -224,7 +262,7 @@ class QuotationForm extends Component
             'tax'                       => $taxAmount,
             'total'                     => $total,
             'type'                      =>  $type, // نوع العرض (عرض سعر أو فاتورة)
-            'user_id'                   => $this->selected_user_id,
+            'user_id'                   => $this->selected_user_id
         ]);
         // حفظ العناصر
         foreach ($this->items as $item) {
@@ -235,6 +273,7 @@ class QuotationForm extends Component
                 'quantity'     => $item['quantity'],
                 'price'        => $item['price'],       // السعر شامل الزيادة
                 'total_price'  => $item['total_price'], // شامل الزيادة
+                'print_service_id' => $item['print_service_id'] ?? null,
             ]);
 
             // if (!empty($item['supply_ids'])) {
@@ -264,6 +303,9 @@ class QuotationForm extends Component
             'selectedPrintServiceId',
 
         ]);
+
+        $this->selected_user_id = '';
+            $this->selectKey++; // غير المفتاح لإجبار إعادة البناء
         //document type
         $this->getNewQuotationNumber($this->type);
             if ($this->document_type === 'quotation') {
@@ -284,6 +326,11 @@ class QuotationForm extends Component
 
     public function loadPrintServiceInfo($id)
     {
+
+           if (empty($this->customer_name)) {
+            $this->addError('customer_name','❌ يرجى إدخال اسم العميل قبل إضافة الأصناف.');
+            return;
+        }
         if (!$id) return;
 
         $service = \App\Models\PrintService::with(['items', 'supplies'])->find($id);
@@ -291,16 +338,16 @@ class QuotationForm extends Component
         if (!$service) return;
 
 
-        $basePrice = $service->item_price;
-        $adjustedPrice = round($basePrice + ($basePrice * ($this->price_modifier_percentage / 100)), 2);
-        $totalPrice = round($adjustedPrice * $service->quantity, 2);
 
+        $item_price = $service->item_price + ($service->item_price * ($this->price_modifier_percentage / 100));
+        $totalPrice = $service->total_price + ($service->total_price * ($this->price_modifier_percentage / 100));
         $this->items[] = [
+            'print_service_id' => $service->id, // حفظ ID الخدمة للطباعة
             'names'       => $service->items->pluck('name_ar')->toArray(),
             'description' => $service->name_ar,
             'supplies'    => $service->supplies->pluck('name_ar')->toArray(),
             'quantity'    => $service->quantity,
-            'price'       => $adjustedPrice, // سعر شامل الزيادة
+            'price'       => $item_price, // سعر شامل الزيادة
             'total_price' => $totalPrice,    // الإجمالي شامل الزيادة
         ];
 

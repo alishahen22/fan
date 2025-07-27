@@ -65,12 +65,48 @@
                             <div class="invalid-feedback">@lang('Please Enter a value')</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="manufacturer-name-input">خصم اضافي (%) </label>
+                            <label class="form-label" for="manufacturer-name-input"> هامش الربح % </label>
                             <input type="number" step="any" min="0" max="100" class="form-control" id="discount"
                                    name="discount"
                                    value="{{ isset($data) ? $data->discount : old('discount') }}">
                             <div class="invalid-feedback">@lang('Please Enter a value')</div>
                         </div>
+
+                       <div class="mb-3">
+                        <label class="form-label">نوع العميل</label>
+                        <select id="customer_type" name="customer_type" class="form-control">
+                            <option value="individual" {{ old('customer_type', $data->customer_type ?? '') == 'individual' ? 'selected' : '' }}>فردي</option>
+                            <option value="business" {{ old('customer_type', $data->customer_type ?? '') == 'business' ? 'selected' : '' }}>تجاري</option>
+                        </select>
+                    </div>
+
+                   <div id="business-fields" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">السجل التجاري</label>
+                        <input type="text" class="form-control" id="commercial_register" name="commercial_register"
+                            value="{{ old('commercial_register', $data->commercial_register ?? '') }}">
+                        <div class="invalid-feedback">@lang('Please Enter a value')</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">صورة السجل التجاري</label>
+                        <input type="file" class="form-control" id="commercial_register_image" name="commercial_register_image"
+                            accept="image/*">
+                        <div class="invalid-feedback">@lang('Please Enter a value')</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">الرقم الضريبي</label>
+                        <input type="text" class="form-control" id="tax_number" name="tax_number"
+                            value="{{ old('tax_number', $data->tax_number ?? '') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">صورة الرقم الضريبي</label>
+                        <input type="file" class="form-control" id="tax_number_image" name="tax_number_image" accept="image/*">
+                    </div>
+                </div>
+
                         <div class="mb-3">
                             <label class="form-label required" for="manufacturer-name-input">كلمة المرور</label>
                             <input type="password" class="form-control" id="password"
@@ -108,5 +144,22 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ URL::asset('build/js/pages/select2.init.js') }}"></script>
     <script src="{{ URL::asset('build/js/custom.js') }}"></script>
+
+    <script>
+    $(document).ready(function () {
+        function toggleBusinessFields() {
+            if ($('#customer_type').val() === 'business') {
+                $('#business-fields').show();
+                $('#commercial_register').prop('required', true);
+            } else {
+                $('#business-fields').hide();
+                $('#commercial_register').prop('required', false);
+            }
+        }
+
+        $('#customer_type').on('change', toggleBusinessFields);
+        toggleBusinessFields(); // عند تحميل الصفحة
+    });
+</script>
 @endsection
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->string('password');
-            $table->enum('type',['admin', 'assistant'])->default('admin');
+            $table->enum('type',['admin', 'assistant' , 'printer'])->default('admin');
             $table->tinyInteger('is_active')->default(1)->comment("1 active , 0 inactive");
             $table->rememberToken();
             $table->timestamps();

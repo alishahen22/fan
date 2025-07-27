@@ -22,6 +22,7 @@
         "santigarcor/laratrust": "^8.3",
         "teckwei1993/laravel-otp": "^1.0",
         "tymon/jwt-auth": "^2.1",
+        "wireui/wireui": "^2.4",
         "yajra/laravel-datatables-oracle": "^10.11"
     },
     "require-dev": {

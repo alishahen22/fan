@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\OrderStatusEnum;
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Admin;
 use App\Models\Order;
-use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
+use App\Enums\OrderStatusEnum;
+use App\Enums\PaymentStatusEnum;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-use Yajra\DataTables\Facades\DataTables;
-use App\Enums\PaymentStatusEnum;
 
 class UsersController extends Controller
 {
@@ -48,19 +49,32 @@ class UsersController extends Controller
             'city_id' => 'required|exists:cities,id',
             'phone' => 'required|min:7|unique:users,phone',
             'discount' => 'required|numeric|min:0|max:100',
+            'customer_type' => 'required|in:individual,business',
+            'commercial_register' => 'required_if:customer_type,business|digits:10',
+            'commercial_register_image' => 'required_if:customer_type,business|image|mimes:jpg,jpeg,png|max:2048',
+            'tax_number' => 'nullable|digits:15',
+            'tax_number_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
         ]);
-        if (!is_array($validator) && $validator->fails()) {
-            return redirect()->back()->withErrors($validator->validated());
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'city_id' => $request->city_id,
-            'discount' => $request->discount,
-            'password' => $request->password,
-        ]);
+
+        $data = $validator->validated();
+
+        // رفع الصور
+        if ($request->hasFile('commercial_register_image')) {
+            $data['commercial_register_image'] = $request->file('commercial_register_image')->store('commercial_registers', 'public');
+        }
+        if ($request->hasFile('tax_number_image')) {
+            $data['tax_number_image'] = $request->file('tax_number_image')->store('tax_numbers', 'public');
+        }
+
+        $data['password'] = bcrypt($data['password']);
+
+        User::create($data);
+
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -81,17 +95,37 @@ class UsersController extends Controller
             'phone' => 'required|min:7|unique:users,phone,' . $id,
             'city_id' => 'required|exists:cities,id',
             'discount' => 'required|numeric|min:0|max:100',
+            'customer_type' => 'required|in:individual,business',
+            'commercial_register' => 'required_if:customer_type,business|digits:10',
+            'commercial_register_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'tax_number' => 'nullable|digits:15',
+            'tax_number_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'password' => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
         ]);
-        $inputs = $validator->validated();
-        if (!is_array($validator) && $validator->fails()) {
-            return redirect()->back()->withErrors($inputs);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
+
+        $data = $validator->validated();
         $user = User::findOrFail($id);
-        if(!isset($request->password)){
-            unset($inputs['password']);
+
+        // رفع الصور (تحديث)
+        if ($request->hasFile('commercial_register_image')) {
+            $data['commercial_register_image'] = $request->file('commercial_register_image')->store('commercial_registers', 'public');
         }
-        $user->update($inputs);
+        if ($request->hasFile('tax_number_image')) {
+            $data['tax_number_image'] = $request->file('tax_number_image')->store('tax_numbers', 'public');
+        }
+
+        if (!empty($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -100,7 +134,28 @@ class UsersController extends Controller
     {
         $data = User::whereId($id)->first();
         $columns = $this->orders_columns();
-        return view('users.show', compact('data', 'columns'));
+        //get user invoices
+        $yearTotal = Quotation::where('user_id', $id)
+        ->where('type', 'invoice')
+        ->whereYear('date', now()->year)
+        ->sum('total');
+
+    $monthTotal = Quotation::where('user_id', $id)
+        ->where('type', 'invoice')
+        ->whereYear('date', now()->year)
+        ->whereMonth('date', now()->month)
+        ->sum('total');
+
+        $lifetimeTotal = Quotation::where('user_id', $id)
+            ->where('type', 'invoice')
+            ->sum('total');
+
+            $date   = [
+                'yearTotal' => $yearTotal,
+                'monthTotal' => $monthTotal,
+                'lifetimeTotal' => $lifetimeTotal,
+            ];
+        return view('users.show', compact('data', 'columns', 'date'));
     }
 
     /**

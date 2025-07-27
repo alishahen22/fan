@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('description'); // وصف الصنف (مثلاً: كروت دعوة لحفل)
             $table->unsignedInteger('quantity');
             //supplies_ids
-            $table->string('supplies_ids')->nullable(); 
+            $table->string('supplies_ids')->nullable();
             $table->decimal('price', 10, 2)->default(0);  // مجموع تكلفة المستلزمات
             $table->decimal('total_price', 10, 2);
+            //print service id
+            $table->foreignId('print_service_id')->nullable()->constrained('print_services')->onDelete('set null');
             $table->timestamps();
         });
     }

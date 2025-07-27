@@ -18,8 +18,15 @@ use Endroid\QrCode\Response\QrCodeResponse;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+
+            if($request->user_id){
+                session(['user_id' => $request->user_id]);
+            }else{
+                session()->forget('user_id');
+            }
+
         return view('invoices.list', [
             'columns' => $this->columns()
         ]);
@@ -50,7 +57,11 @@ class InvoiceController extends Controller
     {
 
         $invoice = Quotation::with('items')->where('id', $id)->where('type', 'invoice')->firstOrFail();
-
+        $logoPath = public_path('storage/' . getsetting('logo'));
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logoPath));
+        }
             $qrCode = generate_zatca_qr([
                 'seller_name' => getsetting('company_name'),
                 'vat_number' => getsetting('tax_number'),
@@ -58,7 +69,7 @@ class InvoiceController extends Controller
                 'total_with_vat' => $invoice->total,
                 'vat_amount' => $invoice->tax
     ]);
-        $html = view('invoices.pdf', compact('invoice', 'qrCode'))->render();
+        $html = view('invoices.pdf', compact('invoice', 'qrCode' , 'logoBase64'))->render();
 
        $mpdf = new Mpdf([
              'mode' => 'utf-8',
@@ -114,6 +125,9 @@ class InvoiceController extends Controller
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
                 $query->where('date', '<=', $request->to_date);
+            })
+             ->when(session('user_id'), function ($query) {
+                return $query->where('user_id', session('user_id'));
             });
         return $query;
     }
@@ -130,5 +144,11 @@ class InvoiceController extends Controller
         ];
     }
 
+
+       public function destroy($id)
+        {
+            Quotation::findOrFail($id)->delete();
+            return redirect()->route('invoices.index')->with('success', __('Deleted successfully'));
+        }
 
 }

@@ -42,20 +42,21 @@ class AdminsController extends Controller
             'name' => 'required|min:3',
             'email' => 'required|email|unique:admins,email',
             'phone' => 'required|min:7|unique:admins,phone',
-            'password' => ['required','confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'pawword' => ['required','confirmed', Password::min(8) ],
+            // 'password' => ['required','confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
 //            'role_id' => 'nullable|exists:roles,id',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
-            return redirect()->back()->withErrors($validator->validated());
-        }
+        // if (!is_array($validator) && $validator->fails()) {
+        //     return redirect()->back()->withErrors($validator->validated());
+        // }
 
         $admin = Admin::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'type' => auth()->user()->type
+            'type' =>  $request->type
 
         ]);
 
@@ -93,7 +94,8 @@ class AdminsController extends Controller
             'name' => 'required|min:3',
             'email' => 'required|email|unique:admins,email,' . $id,
             'phone' => 'required|min:7|unique:admins,phone,' . $id,
-            'password' => ['nullable','confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password' => ['nullable','confirmed', Password::min(8)],
+
 //            'role_id' => 'required|exists:roles,id',
         ]);
 
@@ -113,6 +115,7 @@ class AdminsController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'type' => $request->type,
         ];
 
         if ($request->filled('password')) {

@@ -1,38 +1,24 @@
 @extends('layouts.master')
 
+@section('title') {{ __('Invoice Details') }} @endsection
 @section('content')
 <div class="container my-5" id="print-area">
 
     {{-- QR Code + Company Info --}}
     <div class="d-flex justify-content-between align-items-start mb-4">
-        {{-- QR Code --}}
-        <div style="max-width: 150px;">
-            <img src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code" class="img-fluid">
+
+        <div >
+         <h3 class="mb-2">{{ getsetting('company_name') }}</h3>
+            <img src="{{ asset('storage/' . getsetting('logo')) }}" alt="Company Logo" class="img-fluid" style="max-width: 200px;">
         </div>
+
 
         {{-- Company Info --}}
 <div style="text-align: right;">
-    <h3 class="mb-2">{{ getsetting('company_name') }}</h3>
-
-    <div class="info-row">
-        <div class="info-label">{{ __('السجل التجاري') }}:</div>
-        <div>{{ getsetting('commercial_record') }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">{{ __('الرقم الضريبي') }}:</div>
-        <div>{{ getsetting('tax_number') }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">{{ __('الهاتف') }}:</div>
-        <div>{{ getsetting('phone') }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">{{ __('البريد الإلكتروني') }}:</div>
-        <div>{{ getsetting('email') }}</div>
-    </div>
+ {{-- QR Code --}}
+        <div style="max-width: 150px;">
+            <img src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="QR Code" class="img-fluid">
+        </div>
 </div>
 
     </div>
@@ -124,16 +110,23 @@
                 <td style="width: 50%; text-align: right; border-style: none;">{{ __('الهاتف') }}: {{ getsetting('phone') }}</td>
                 <td style="width: 50%; text-align: right; border-style: none;">{{ __('البريد الإلكتروني') }}: {{ getsetting('email') }}</td>
             </tr>
+            <tr>
+                <td colspan="2" style="width: 50%; text-align: right; border-style: none;">{{ __('العنوان') }}: {{ getsetting('address') }}</td>
+            </tr>
         </table>
     </div>
 
 </div>
 
 {{-- Buttons --}}
-<div class="mt-4 text-end no-print">
-    <button onclick="window.print()" class="btn btn-primary">🖨️ {{ __('طباعة') }}</button>
-    <a href="{{ route('invoices.pdf', $invoice->id) }}" class="btn btn-primary">📄 {{ __('تحميل PDF') }}</a>
-</div>
+  <div class="d-flex justify-content-center flex-wrap gap-3 mb-4 no-print">
+
+        <a href="{{ route('invoices.pdf', $invoice->id) }}"  class="btn btn-outline-dark no-print">pdf تحميل</a>
+        <button onclick="window.print()" class="btn btn-outline-dark no-print" >طباعة</button>
+
+
+
+    </div>
 @endsection
 
 @section('css')
@@ -226,6 +219,8 @@
 @endsection
 
 @section('script')
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
 @if(session('print'))
 <script>
     window.onload = function () {
@@ -233,4 +228,9 @@
     };
 </script>
 @endif
+
+
 @endsection
+
+
+

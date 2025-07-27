@@ -14,12 +14,18 @@
                 {{-- اختيار العميل --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">العميل</label>
-                    <select  wire:change="loadUserInfo" wire:model="selected_user_id" class="form-select">
-                        <option value="">اختر عميل</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
+                  <select
+                    wire:key="user-select-{{ $selectKey }}"
+                    wire:change="loadUserInfo"
+                    wire:model="selected_user_id"
+                    class="form-select"
+                    @if (!empty($items)) disabled @endif
+                >
+                    <option value="">اختر عميل</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                    @endforeach
+                </select>
                     @error('customer_name') <small class="text-danger">{{ $message }}</small> @enderror
                 </div>
 
@@ -57,7 +63,8 @@
 
 <div class="mb-3">
     <label class="form-label fw-bold">اختر صنف جاهز</label>
- <select wire:change="loadPrintServiceInfo($event.target.value)" wire:model="selectedPrintServiceId" class="form-select">
+ <select wire:change="loadPrintServiceInfo($event.target.value)" wire:model="selectedPrintServiceId" class="form-select" wire:key="user-select-{{ $selectKey }}">
+
     <option value="">— اختر —</option>
     @foreach(\App\Models\PrintService::where('hidden', false)->withCount('items')->get() as $service)
         <option value="{{ $service->id }}">
@@ -96,8 +103,8 @@
                     </td>
                     <td>{{ $item['quantity'] }}</td>
 
-                    <td>{{ number_format($item['price'], 2)  }} ج.م</td>
-                    <td class="fw-bold">{{ number_format($item['total_price'], 2) }} ج.م</td>
+                    <td>{{ number_format($item['price'], 4)  }} ر.س</td>
+                    <td class="fw-bold">{{ number_format($item['total_price'], 2) }} ر.س</td>
                     <td>
                         <button wire:click="removeItem({{ $index }})" class="btn btn-sm btn-danger">
                             ✖
@@ -127,19 +134,19 @@
 
     <div class="d-flex justify-content-between mb-2">
         <span><strong>الإجمالي:</strong></span>
-        <span>{{ number_format($this->subtotal, 2) }} ج.م</span>
+        <span>{{ number_format($this->subtotal, 2) }} ر.س</span>
     </div>
 
     <div class="d-flex justify-content-between mb-2">
         <span><strong>الضريبة {{ $this->tax }}%:</strong></span>
-        <span>{{ number_format($this->taxNumber, 2) }} ج.م</span>
+        <span>{{ number_format($this->taxNumber, 2) }} ر.س</span>
     </div>
 
     <hr>
 
     <div class="d-flex justify-content-between fs-5 fw-bold text-success">
         <span>المطلوب:</span>
-        <span>{{ number_format($this->totalWithTax, 2) }} ج.م</span>
+        <span>{{ number_format($this->totalWithTax, 2) }} ر.س</span>
     </div>
 
     </div>
@@ -170,7 +177,7 @@
             💾 حفظ {{ $document_type === 'quotation' ? 'عرض السعر' : 'الفاتورة' }}
         </button>
         @if ($document_type === 'quotation')
-            <button wire:click="convertToInvoice" class="btn btn-success">
+            <button wire:click="convertToInvoice" class="btn btn-outline-dark">
                 تحويل إلى فاتورة
             </button>
 
@@ -206,18 +213,27 @@
                 <div class="row g-3">
 
                     {{-- الأصناف --}}
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">الأصناف <small class="text-muted">(يمكن اختيار أكثر من واحد)</small></label>
-                        <select wire:model="newItem.item_ids" multiple class="form-select" size="5">
-                            @foreach($itemsList as $item)
-                                <option value="{{ $item->id }}">
-                                    {{ $item->name_ar }} ({{ $item->width_cm }}×{{ $item->height_cm }} سم - {{ number_format($item->price, 2) }} ج.م)
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('newItem.item_ids') <small class="text-danger d-block">{{ $message }}</small> @enderror
-                        @error('newItem.item_ids.*') <small class="text-danger d-block">{{ $message }}</small> @enderror
-                    </div>
+             <div class="col-md-12 mb-3">
+                <label class="form-label fw-bold">بحث عن مادة خام</label>
+                <input type="text" wire:model="searchItem"   class="form-control" placeholder="ابحث بالاسم...">
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold">المواد الخام <small class="text-muted">(يمكن اختيار أكثر من واحد)</small></label>
+                <select wire:model="newItem.item_ids" multiple class="form-select" size="5">
+                    @forelse($itemsList as $item)
+                        <option value="{{ $item->id }}">
+                            {{ $item->name_ar }} ({{ $item->width_cm }}×{{ $item->height_cm }} سم - {{ number_format($item->price, 2) }} ر.س)
+                        </option>
+                    @empty
+                        <option disabled>لا توجد نتائج</option>
+                    @endforelse
+                </select>
+                @error('newItem.item_ids')
+                    <small class="text-danger d-block">{{ $message }}</small>
+                @enderror
+            </div>
+
 
                     {{-- الوصف --}}
                     <div class="col-md-12">
@@ -252,7 +268,7 @@
                         <select wire:model="newItem.supplies" multiple class="form-select" size="5">
                             @foreach($suppliesList as $supply)
                                 <option value="{{ $supply->id }}">
-                                    {{ $supply->name_ar }} — {{ number_format($supply->price, 2) }} ج.م
+                                    {{ $supply->name_ar }} — {{ number_format($supply->price, 2) }} ر.س
                                 </option>
                             @endforeach
                         </select>

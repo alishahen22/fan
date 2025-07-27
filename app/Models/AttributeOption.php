@@ -10,9 +10,9 @@ class AttributeOption extends Model
     use HasFactory;
 
     protected $fillable = ['attribute_id',
-'title_ar',
-'title_en',
-'is_active',];
+                        'title_ar',
+                        'title_en',
+                        'is_active',];
 
     protected $appends = ['title'];
 

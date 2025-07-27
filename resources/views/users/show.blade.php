@@ -47,123 +47,172 @@
 
 
     <div class="row">
-        <div class="col-xxl-4">
-            <div class="card">
-                <div class="card-body p-4">
-                    <div>
-                        <div class="mt-4 text-center">
-                            <h5 class="mb-1">{{$data->name}}</h5>
-                            <p class="text-muted">{{$data->date_of_birth}}</p>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table mb-0 table-borderless">
-                                <tbody>
-                                <tr>
-                                    <th><span class="fw-medium">رقم الجوال</span></th>
-                                    <td>({{$data->country_code}}){{$data->phone}} </td>
-                                </tr>
-                                <tr>
-                                    <th><span class="fw-medium">البريد الإلكتروني</span></th>
-                                    <td>{{$data->email}}</td>
-                                </tr>
-
-
-                                <tr>
-                                    <th><span class="fw-medium">اسم الشركة</span></th>
-                                    <td>{{$data->company_name}}</td>
-                                </tr>
-                                <tr>
-                                    <th><span class="fw-medium">المسمى الوظيفي</span></th>
-                                    <td>{{$data->job_name}}</td>
-                                </tr>
-
-                                <tr>
-                                    <th><span class="fw-medium">الدولة</span></th>
-                                    <td>{{$data->city?->title}}</td>
-                                </tr>
-                                <tr>
-                                    <th><span class="fw-medium">النوع</span></th>
-                                    <td>{{trans($data->gender)}}</td>
-                                </tr>
-                                <tr>
-                                    <th><span class="fw-medium">شهادة القيمة المضافة</span></th>
-                                    <td>
-                                        <p>{{$data->value_added_certificate}}</p>
-                                        @isset($data->value_added_certificate_file)
-                                            <a href="{{$data->value_added_certificate_file}}" target="_blank" download="{{basename($data->value_added_certificate_file)}}" >
-                                                <div class="avatar-sm flex-shrink-0" >
-                                            <span class="avatar-title bg-light rounded fs-3">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text text-primary icon-dual-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                            </span>
-                                                </div>
-                                                {{--                    <span>{{basename($design->file)}}</span>--}}
-                                            </a>
-                                        @endisset
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+      <div class="col-xxl-4">
+    <div class="card">
+        <div class="card-body p-4">
+            <div>
+                <div class="mt-4 text-center">
+                    <h5 class="mb-1">{{$data->name}}</h5>
+                    <p class="text-muted">{{$data->date_of_birth}}</p>
                 </div>
-                <!--end card-body-->
-                <div class="card-body border-top border-top-dashed p-4">
-                    <div>
-                        <h6 class="text-muted text-uppercase fw-semibold mb-4">نقاط العميل</h6>
-                        <div>
-                            <div>
-                                <div class="bg-light px-3 py-2 rounded-2 mb-2">
-                                    <div class="d-flex align-items-center">
+                <div class="table-responsive">
+                    <table class="table mb-0 table-borderless">
+                        <tbody>
+                        <tr>
+                            <th><span class="fw-medium">رقم الجوال</span></th>
+                            <td>({{$data->country_code}}) {{$data->phone ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">البريد الإلكتروني</span></th>
+                            <td>{{$data->email ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">اسم الشركة</span></th>
+                            <td>{{$data->company_name ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">المسمى الوظيفي</span></th>
+                            <td>{{$data->job_name ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">الدولة</span></th>
+                            <td>{{$data->city?->title ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">النوع</span></th>
+                            <td>{{ $data->gender ? trans($data->gender) : 'لا يوجد' }}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">نوع العميل</span></th>
+                            <td>{{$data->customer_type ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">السجل التجاري</span></th>
+                            <td>{{$data->commercial_register ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">صورة السجل التجاري</span></th>
+                            <td>
+                                @if(!empty($data->commercial_register_image))
+                                <a href="{{ asset('storage/' .  $data->commercial_register_image) }}" target="_blank">
+                                    <img style="width: 80; height: 80px;" src="{{ asset( 'storage/' .  $data->commercial_register_image) }}" alt="">
+                                </a>
+                                @else
+                                    لا يوجد
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">الرقم الضريبي</span></th>
+                            <td>{{$data->tax_number ?? 'لا يوجد'}}</td>
+                        </tr>
+                        <tr>
+                            <th><span class="fw-medium">صورة الرقم الضريبي</span></th>
+                            <td>
+                                    @if(!empty($data->tax_number_image))
+                                        <a href="{{ asset('storage/' .  $data->tax_number_image) }}" target="_blank">
+                                        <img src="{{ asset('storage/' .  $data->tax_number_image) }}" alt="">
+                                        </a>
+                                    @else
+                                        لا يوجد
+                                    @endif
+                            </td>
+                        </tr>
+                        <tr>
 
-                                        <div class="flex-shrink-0">
-                                            <h6 class="mb-0 center">{{$data->points}}</h6>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                        </div>
-                    </div>
-                    <div>
-                        <h6 class="text-muted text-uppercase fw-semibold mb-4">محفظة العميل</h6>
-                        <div>
-                            <div>
-                                <div class="bg-light px-3 py-2 rounded-2 mb-2">
-                                    <div class="d-flex align-items-center">
-
-                                        <div class="flex-shrink-0">
-                                            <h6 class="mb-0 center">{{$data->money}}</h6>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-
             </div>
-            <!--end card-->
         </div>
+
+        <!-- نقاط ومحفظة العميل -->
+        <div class="card-body border-top border-top-dashed p-4">
+            <div>
+                <h6 class="text-muted text-uppercase fw-semibold mb-4">نقاط العميل</h6>
+                <div class="bg-light px-3 py-2 rounded-2 mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <h6 class="mb-0 center">{{$data->points ?? '0'}}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h6 class="text-muted text-uppercase fw-semibold mb-4">محفظة العميل</h6>
+                <div class="bg-light px-3 py-2 rounded-2 mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <h6 class="mb-0 center">{{$data->money ?? '0'}}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
         <!--end col-->
 
         <div class="col-xxl-8">
 
             <div class="card" id="customerList">
-                <div class="card-header border-bottom-dashed">
+              <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-light border-bottom border-2 border-primary">
+                    <h4 class="card-title text-dark fw-bold mb-0">
+                        <i class="bi bi-bar-chart-line text-primary me-2"></i> ملخص مالي
+                    </h4>
+                </div>
+            <div class="card-body">
 
-                    <div class="row g-4 align-items-center">
-                        <div class="col-sm">
-                            <div>
-                                <h5 class="card-title mb-0">الطلبات</h5>
-                            </div>
+                <!-- الإحصائيات -->
+                <div class="row text-center g-3">
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-primary bg-opacity-10 rounded-3 shadow-sm">
+                            <h6 class="fw-semibold text-muted">إجمالي الفواتير الشهرية</h6>
+                            <h4 class="text-primary fw-bold mb-0">
+                                {{ $date['monthTotal'] }} <small class="fs-6">ريال</small>
+                            </h4>
                         </div>
                     </div>
-                </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-success bg-opacity-10 rounded-3 shadow-sm">
+                            <h6 class="fw-semibold text-muted">إجمالي الفواتير لهذا العام</h6>
+                            <h4 class="text-success fw-bold mb-0">
+                                {{ $date['yearTotal'] }} <small class="fs-6">ريال</small>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-3 shadow-sm">
+                            <h6 class="fw-semibold text-muted">إجمالي الفواتير مدى الحياة</h6>
+                            <h4 class="text-warning fw-bold mb-0">
+                                {{ $date['lifetimeTotal'] }} <small class="fs-6">ريال</small>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                    <a href="{{ route('invoices.index'  , 'user_id='.$data->id) }}" class="btn btn-primary btn-sm px-4">
+                        عرض جميع الفواتير
+                    </a>
+        </div>
+        </div>
+
+        <!-- فاصل -->
+        <hr class="my-4">
+
+        <!-- الطلبات -->
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0 text-dark">
+                <i class="bi bi-bag-check text-primary me-1"></i> الطلبات
+            </h5>
+            <a href="#" class="btn btn-sm btn-outline-primary">عرض التفاصيل</a>
+        </div>
+
+
+    </div>
+</div>
 
                 <div class="card-body border-bottom-dashed border-bottom">
 

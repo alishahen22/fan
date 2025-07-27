@@ -138,6 +138,12 @@
                     <td style="width: 50%; text-align: right; border-style: none;">{{ __('البريد الإلكتروني') }}: {{ getsetting('email') }}</td>
                 </tr>
             </table>
+
+              <div style="margin-bottom: 10px;">
+            @if(!empty($logoBase64))
+                        <img src="{{ $logoBase64 }}" alt="Logo" style="width:150px;">
+                    @endif
+            </div>
         </div>
     </footer>
 

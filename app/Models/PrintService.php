@@ -35,28 +35,67 @@ class PrintService extends Model
         return  $this->calculateTotalPrice()['unit_price'] ?? 0;
     }
 
+    // public function calculateTotalPrice()
+    // {
+    //     $paperTotal = 0;
+
+    //     foreach ($this->items as $item) {
+    //         $sheetArea = $item->width_cm * $item->height_cm;
+    //         $cardArea = $this->width * $this->height;
+    //         if ($cardArea <= 0 || $sheetArea <= 0) continue;
+
+    //         $cardsPerSheet = floor($sheetArea / $cardArea);
+    //         if ($cardsPerSheet <= 0) $cardsPerSheet = 1;
+
+    //         $sheetsRequired = ceil($this->quantity / $cardsPerSheet);
+    //         $paperTotal += $sheetsRequired * $item->price;
+    //     }
+
+    //     $suppliesTotal = $this->supplies->sum('price');
+    //     $totalPrice = $paperTotal + $suppliesTotal;
+
+    //     return [
+    //             'total_price' => round($totalPrice, 2),
+    //             'unit_price' => round($totalPrice / $this->quantity, 4),
+    //         ];
+    // }
+
     public function calculateTotalPrice()
     {
         $paperTotal = 0;
 
         foreach ($this->items as $item) {
-            $sheetArea = $item->width_cm * $item->height_cm;
-            $cardArea = $this->width * $this->height;
-            if ($cardArea <= 0 || $sheetArea <= 0) continue;
+            // تحقق من الأبعاد
+            if ($this->width <= 0 || $this->height <= 0 || $item->width_cm <= 0 || $item->height_cm <= 0) {
+                continue;
+            }
 
-            $cardsPerSheet = floor($sheetArea / $cardArea);
-            if ($cardsPerSheet <= 0) $cardsPerSheet = 1;
+            // ✅ الطريقة التانية: حساب الكروت داخل الفرخ بناءً على الأبعاد
+            $cardsInWidth = floor($item->width_cm / $this->width);
+            $cardsInHeight = floor($item->height_cm / $this->height);
+            $cardsPerSheet = $cardsInWidth * $cardsInHeight;
 
+            if ($cardsPerSheet <= 0) {
+                $cardsPerSheet = 1; // ضمان عدم القسمة على صفر
+            }
+
+            // احسب عدد الفراخ المطلوبة لهذا النوع من الورق
             $sheetsRequired = ceil($this->quantity / $cardsPerSheet);
+
+            // اجمع سعر الورق
             $paperTotal += $sheetsRequired * $item->price;
         }
 
+        // جمع أسعار المستلزمات
         $suppliesTotal = $this->supplies->sum('price');
+
+        // الناتج النهائي
         $totalPrice = $paperTotal + $suppliesTotal;
 
         return [
-                'total_price' => round($totalPrice, 2),
-                'unit_price' => round($totalPrice / $this->quantity, 4),
-            ];
+            'total_price' => round($totalPrice, 2),
+            'unit_price' => round($totalPrice / $this->quantity, 4),
+        ];
     }
+
 }

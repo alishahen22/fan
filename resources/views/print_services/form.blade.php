@@ -1,8 +1,6 @@
 @extends('layouts.master')
 @section('title') {{ $title }} @endsection
-@section('css')
-    <link rel="stylesheet" href="https://jeremyfagis.github.io/dropify/dist/css/dropify.min.css">
-@endsection
+
 @section('content')
 @component('components.breadcrumb')
     @slot('li_1') @lang('Home') @endslot
@@ -40,34 +38,38 @@
                         </div>
 
                         {{-- Items --}}
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">@lang('Raw Materials (Items)')</label>
-                                <select name="items[]" class="form-select" multiple required size="6">
-                                    @foreach($items as $item)
-                                        <option value="{{ $item->id }}"
-                                            {{ isset($printService) && $printService->items->contains($item->id) ? 'selected' : '' }}>
-                                            {{ $item->name_ar }} — {{ number_format($item->price, 2) }} ج.م
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+<!-- Raw Materials (Items) -->
+<div class="col-md-6">
+    <div class="mb-3">
+        <label class="form-label">@lang('Raw Materials (Items)')</label>
+        <select id="items" name="items[]" multiple required placeholder="اختر أو ابحث..." class="form-control select2">
+            @foreach($items as $item)
+                <option value="{{ $item->id }}"
+                    {{ isset($printService) && $printService->items->contains($item->id) ? 'selected' : '' }}>
+                    {{ $item->name_ar }} — {{ number_format($item->price, 2) }} ر.س
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
 
-                        {{-- Supplies --}}
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">@lang('Supplies')</label>
-                                <select name="supplies[]" class="form-select" multiple size="6">
-                                    @foreach($supplies as $supply)
-                                        <option value="{{ $supply->id }}"
-                                            {{ isset($printService) && $printService->supplies->contains($supply->id) ? 'selected' : '' }}>
-                                            {{ $supply->name_ar }} — {{ number_format($supply->price, 2) }} ج.م
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+<!-- Supplies -->
+<div class="col-md-6">
+    <div class="mb-3">
+        <label class="form-label ">@lang('Supplies')</label>
+        <select id="supplies" name="supplies[]" multiple placeholder="اختر أو ابحث..." class="form-control select2">
+            @foreach($supplies as $supply)
+                <option value="{{ $supply->id }}"
+                    {{ isset($printService) && $printService->supplies->contains($supply->id) ? 'selected' : '' }}>
+                    {{ $supply->name_ar }} — {{ number_format($supply->price, 2) }} ر.س
+                </option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+
+
 
                            <div class="col-md-6">
                             <div class="mb-3">
@@ -91,14 +93,7 @@
                         </div>
 
                         {{-- Price (display only) --}}
-                        @isset($printService)
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">@lang('Calculated Price')</label>
-                                <input type="text" class="form-control" value="{{ number_format($printService->price, 2) }} ج.م" disabled>
-                            </div>
-                        </div>
-                        @endisset
+
                     </div>
 
                 </div>
@@ -110,4 +105,52 @@
         </div>
     </div>
 </form>
+
+
+@endsection
+
+@section('script')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
+    <script src="{{ URL::asset('build/js/pages/form-validation.init.js') }}"></script>
+
+ <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/ar.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        new TomSelect("#items", {
+            plugins: ['remove_button'],
+            placeholder: 'اختر أو ابحث...',
+            create: false,
+            sortField: { field: "text", direction: "asc" }
+        });
+
+        new TomSelect("#supplies", {
+            plugins: ['remove_button'],
+            placeholder: 'اختر أو ابحث...',
+            create: false,
+            sortField: { field: "text", direction: "asc" }
+        });
+    });
+</script>
+
+@endsection
+
+@section('css')
+    <link rel="stylesheet" href="https://jeremyfagis.github.io/dropify/dist/css/dropify.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css">
+
+
+
 @endsection
