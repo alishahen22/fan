@@ -1,41 +1,47 @@
+# ---- Build Stage ----
+FROM composer:2 as composer
+
+WORKDIR /var/www
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-progress --prefer-dist
+
+# ---- App Stage ----
 FROM php:8.2-fpm
 
-# Install system packages
+# Fix DNS issue inside container (if any)
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    nginx \
-    supervisor \
     git \
-    unzip \
     curl \
-    libzip-dev \
+    zip \
+    unzip \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    libzip-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy PHP config
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy project files
+# Copy app files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Copy vendor from build
+COPY --from=composer /var/www/vendor ./vendor
 
 # Permissions
-RUN chown -R www-data:www-data /var/www
+RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
 
-# Copy Nginx config
-COPY docker/nginx.conf /etc/nginx/sites-available/default
+# Nginx will be handled in another container
+EXPOSE 9000
 
-# Copy Supervisor config
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Expose HTTP port
-EXPOSE 80
-
-# Start Supervisor (manages PHP-FPM & Nginx)
-CMD ["/usr/bin/supervisord"]
+CMD ["php-fpm"]
