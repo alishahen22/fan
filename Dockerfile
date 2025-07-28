@@ -1,44 +1,41 @@
-# ✅ Base image
 FROM php:8.2-fpm
 
-# ✅ Install system dependencies
+# Install system packages
 RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
     git \
-    curl \
-    zip \
     unzip \
+    curl \
+    libzip-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev \
-    libpq-dev \
-    nginx \
-    supervisor \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+    && docker-php-ext-install pdo pdo_mysql zip
 
-# ✅ Install Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# ✅ Set working directory
+# Set working directory
 WORKDIR /var/www
 
-# ✅ Copy project files
+# Copy project files
 COPY . .
 
-# ✅ Install PHP dependencies
+# Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# ✅ Set permissions
-RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
+# Permissions
+RUN chown -R www-data:www-data /var/www
 
-# ✅ Copy Nginx config
-COPY ./docker/nginx.conf /etc/nginx/sites-available/default
+# Copy Nginx config
+COPY docker/nginx.conf /etc/nginx/sites-available/default
 
-# ✅ Copy Supervisor config
-COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Copy Supervisor config
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# ✅ Expose port
+# Expose HTTP port
 EXPOSE 80
 
-# ✅ Start Supervisor (which runs both PHP-FPM & Nginx)
+# Start Supervisor (manages PHP-FPM & Nginx)
 CMD ["/usr/bin/supervisord"]
