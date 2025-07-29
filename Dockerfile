@@ -24,17 +24,20 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy existing application directory
-COPY . /var/www
+# Copy existing application
+COPY . .
 
-# Set permissions
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Laravel permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Expose port
+# Expose default php-fpm port
 EXPOSE 9000
 
-# Start Laravel dev server instead of php-fpm
-CMD php artisan serve --host=0.0.0.0 --port=9000
+# Start PHP-FPM
+CMD ["php-fpm"]
