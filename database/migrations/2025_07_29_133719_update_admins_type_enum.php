@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE admins MODIFY type ENUM('admin', 'assistant') NOT NULL");
+        DB::statement("ALTER TABLE admins MODIFY type ENUM('admin', 'moderator') NOT NULL");
 
     }
 };
