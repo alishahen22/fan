@@ -71,6 +71,7 @@ Route::prefix('client')->group(function () {
             Route::get('/offers', [HomeController::class, 'offers']);
             Route::get('/not-print-products', [HomeController::class, 'notPrintProducts']);
             Route::get('/print-products', [HomeController::class, 'printProducts']);
+            //test
         });
 
         Route::get('/offers', [HomeController::class, 'allOffers']);
