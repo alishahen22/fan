@@ -62,5 +62,6 @@ class Category extends Model
             }
             $this->attributes['image'] = $imageFields;
         }
+        dd($image ,attributes['image']  );
     }
 }
