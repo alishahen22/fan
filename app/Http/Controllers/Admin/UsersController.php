@@ -27,6 +27,8 @@ class UsersController extends Controller
 
     public function index()
     {
+            return exec('whoami');
+
         return view('users.list', [
             'columns' => $this->columns()
         ]);
