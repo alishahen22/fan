@@ -35,7 +35,7 @@ class directOrderRequest extends FormRequest
             'subject' => 'required|string',
             'message' => 'required|string',
             'files' => 'nullable|array',
-            'files.*' => 'nullable|file|memes:png,jpg,jpeg,pdf,doc,docx,ppt,pptx',
+            'files.*' => 'nullable|file|mimes:png,jpg,jpeg,pdf,doc,docx,ppt,pptx',
         ];
     }
 

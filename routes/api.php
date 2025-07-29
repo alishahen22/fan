@@ -59,7 +59,7 @@ Route::prefix('client')->group(function () {
             Route::post('/contact-us', [SettingsController::class, 'contactUs']);
         });
 
-        
+
 //        home Apis
         Route::group(['prefix' => "home"], function () {
             Route::get('/articles', [HomeController::class, 'articles']);
@@ -70,10 +70,12 @@ Route::prefix('client')->group(function () {
             Route::get('/steps', [HomeController::class, 'steps']);
             Route::get('/reviews', [HomeController::class, 'reviews']);
             Route::get('/offers', [HomeController::class, 'offers']);
+            //test
             Route::get('/not-print-products', [HomeController::class, 'notPrintProducts']);
             Route::get('/print-products', [HomeController::class, 'printProducts']);
-            //test
         });
+
+            Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
 
         Route::get('/offers', [HomeController::class, 'allOffers']);
 

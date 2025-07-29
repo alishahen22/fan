@@ -37,6 +37,12 @@ class ProfileUpdateRequest extends FormRequest
             'phone' => 'required|string|unique:users,phone,' . auth('user')->user()->id,
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female',
+            'customer_type' => 'required|in:individual,business',
+            'commercial_register' => 'required_if:customer_type,business|digits:10',
+            'commercial_register_image' => 'required_if:customer_type,business|file|image|mimes:jpg,jpeg,png|max:2048',
+            'tax_number_image' => 'nullable|file|image|mimes:jpg,jpeg,png|max:2048',
+            'tax_number' => 'nullable|digits:15',
+            'owner_name' => 'required_if:customer_type,business|string|max:255',
         ];
     }
 

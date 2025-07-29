@@ -194,4 +194,13 @@ class HomeController extends Controller
     }
 
 
-}
+    //categoryProducts
+    public function categoryProducts($type): JsonResponse
+    {
+        $data = Product::whereHas('category', function ($q) use ($type) {
+            $q->where('type', $type);
+        })->active()->paginate(20);
+        $result = ProductResources::collection($data)->response()->getData(true);
+        return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
+            }
+        }
