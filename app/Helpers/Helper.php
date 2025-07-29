@@ -152,7 +152,7 @@ if (!function_exists('upload')) {
     function upload($file, $dir = '')
     {
         $fileName = time() . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('public/' . $dir, $fileName);
+        $file->storeAs( $dir, $fileName);
         return $fileName;
     }
 }
