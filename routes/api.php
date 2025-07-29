@@ -70,6 +70,7 @@ Route::prefix('client')->group(function () {
             Route::get('/reviews', [HomeController::class, 'reviews']);
             Route::get('/offers', [HomeController::class, 'offers']);
             Route::get('/not-print-products', [HomeController::class, 'notPrintProducts']);
+            Route::get('/print-products', [HomeController::class, 'printProducts']);
         });
 
         Route::get('/offers', [HomeController::class, 'allOffers']);

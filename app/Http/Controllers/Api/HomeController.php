@@ -126,6 +126,16 @@ class HomeController extends Controller
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
+      public function printProducts(): JsonResponse
+    {
+        $data = Product::whereHas('category', function ($q) {
+            $q->where('type', 'printing');
+        })->active()->get()->take(8);
+        $result = ProductResources::collection($data);
+        return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
+    }
+
+
 
     public function offers(): JsonResponse
     {
