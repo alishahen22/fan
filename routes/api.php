@@ -59,6 +59,7 @@ Route::prefix('client')->group(function () {
             Route::post('/contact-us', [SettingsController::class, 'contactUs']);
         });
 
+        
 //        home Apis
         Route::group(['prefix' => "home"], function () {
             Route::get('/articles', [HomeController::class, 'articles']);
