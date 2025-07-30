@@ -53,7 +53,7 @@ Route::prefix('client')->group(function () {
 
 
         Route::group(['prefix' => "app"], function () {
-            Route::get('pages/{type}', [SettingsController::class, 'pages']);
+        Route::get('pages/{type}', [SettingsController::class, 'pages']);
             Route::get('/settings', [SettingsController::class, 'settings']);
             Route::get('/settings/{key}', [SettingsController::class, 'custom_settings']);
             Route::post('/contact-us', [SettingsController::class, 'contactUs']);
@@ -73,6 +73,7 @@ Route::prefix('client')->group(function () {
             //test
             Route::get('/not-print-products', [HomeController::class, 'notPrintProducts']);
             Route::get('/print-products', [HomeController::class, 'printProducts']);
+            Route::get('/products', [HomeController::class, 'products']);
         });
 
             Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);

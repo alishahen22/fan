@@ -47,6 +47,7 @@ class User extends Authenticatable implements JWTSubject
         'commercial_register_image',
         'tax_number',
         'tax_number_image',
+        'owner_name',
     ];
 
     /**
@@ -140,7 +141,7 @@ class User extends Authenticatable implements JWTSubject
         if (!empty($image) && file_exists(public_path('storage/value_added_certificate_files/' . $image))) {
             return asset('storage') . '/value_added_certificate_files/' . $image;
         }
-        return asset('storage/default.png');
+        return null;
     }
 
     public function setValueAddedCertificateAttribute($image)
@@ -176,5 +177,43 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+
+      public function getCommercialRegisterImageAttribute($image)
+        {
+            if (!empty($image) && file_exists(public_path('storage/commercial_register_images/' . $image))) {
+                return asset('storage') . '/commercial_register_images/' . $image;
+            }
+            return null;
+        }
+
+    public function setCommercialRegisterImageAttribute($image): void
+    {
+        if (!empty($image)) {
+            $imageFields = $image;
+            if (is_file($image)) {
+                $imageFields = upload($image, 'commercial_register_images');
+            }
+            $this->attributes['commercial_register_image'] = $imageFields;
+        }
+    }
+
+    public function getTaxNumberImageAttribute($image)
+    {
+        if (!empty($image) && file_exists(public_path('storage/tax_number_images/' . $image))) {
+            return asset('storage') . '/tax_number_images/' . $image;
+        }
+        return null;
+        }
+
+    public function setTaxNumberImageAttribute($image): void
+    {
+        if (!empty($image)) {
+            $imageFields = $image;
+            if (is_file($image)) {
+                $imageFields = upload($image, 'tax_number_images');
+            }
+            $this->attributes['tax_number_image'] = $imageFields;
+        }
+    }
 
 }

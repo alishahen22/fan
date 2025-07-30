@@ -51,4 +51,9 @@ class Cart extends Model
         return $this->hasMany(CartOption::class);
     }
 
+    public function quantityRelation(): BelongsTo
+    {
+        return $this->belongsTo(ProductQuantity::class, 'quantity', 'id');
+    }
+
 }

@@ -111,14 +111,14 @@
                                 <!-- end row -->
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                {{-- <div class="col-md-6 mb-3">
                                     <label class="form-label" for="percent">@lang('Price Before Tax')</label>
                                     <input type="number" step="0.01" min="0.01" class="form-control" id="price"
                                            name="price"
                                            placeholder="@lang('Please Enter a number')"
                                            value="{{ isset($product) ? $product->price_original : old('price') }}" required>
                                     <div class="invalid-feedback">@lang('Please Enter a valid value')</div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="discount">@lang('Discount Percent') (%)</label>
                                     <input type="number" step="any" min="0" max="100" class="form-control" id="discount"
@@ -195,56 +195,72 @@
 
                     <div class="card-body">
                         <div class="tab-content">
-                            <div id="newlink">
+                            <div id="newlink" >
                                 @if(isset($product) && !empty($product->quantities))
                                     @foreach($product->quantities as $key => $row)
                                         <div id="{{ $key+1 }}">
-                                            <div class="row">
-                                                <div class="col-lg-8">
-                                                    <div class="mb-3">
-                                                        <label for="quantity" class="form-label">
-                                                            @lang('Quantity')
-                                                        </label>
-                                                        <input type="number" step="1" min="0" class="form-control"
-                                                               name="@isset($row) quantities[{{ $key+1 }}] @else quantities[1] @endisset"
-                                                               id="quantity"
-                                                               placeholder="@lang('Enter Quantity')"
-                                                               value="{{ isset($row) ? $row->quantity : old('quantity') }}">
-                                                    </div>
+                                          <div class="row">
+                                        <!-- Quantity -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="quantity" class="form-label">
+                                                @lang('Quantity')
+                                            </label>
+                                            <input type="number" step="1" min="0" class="form-control"
+                                                name="@isset($row) quantities[{{ $key+1 }}] @else quantities[1] @endisset"
+                                                id="quantity"
+                                                placeholder="@lang('Enter Quantity')"
+                                                value="{{ isset($row) ? $row->quantity : old('quantity') }}">
+                                        </div>
+
+                                        <!-- Price -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="price" class="form-label">
+                                                @lang('Price')
+                                            </label>
+                                            <input type="number" step="0.01" min="0" class="form-control"
+                                                name="@isset($row) prices[{{ $key+1 }}] @else prices[1] @endisset"
+                                                id="price"
+                                                placeholder="@lang('Enter Price')"
+                                                value="{{ isset($row) ? $row->price : old('price') }}">
+                                        </div>
+
+                                        <!-- Delete Button -->
+                                        @if(isset($row) && !$loop->first)
+                                            <div class="col-lg-12">
+                                                <div class="hstack gap-2 justify-content-end my-2">
+                                                    <a class="btn btn-success" href="javascript:deleteEl({{ $key+1 }})">@lang('Delete')</a>
                                                 </div>
-                                                <!--end col-->
-                                                @if(isset($row) && ! $loop->first)
-                                                    <div class="hstack gap-2 justify-content-end col-lg-4 my-3">
-                                                        <a class="btn btn-success my-2"
-                                                           href="javascript:deleteEl({{ $key+1 }})">@lang('Delete')</a>
-                                                    </div>
-                                                @endif
                                             </div>
+                                        @endif
+                                    </div>
+
                                             <!--end row-->
                                         </div>
                                     @endforeach
-                                @else
-                                    <div id="1">
-                                        <div class="row">
-                                            <div class="col-lg-8">
-                                                <div class="mb-3">
-                                                    <label for="quantity" class="form-label">
-                                                        @lang('Quantity')
-                                                    </label>
-                                                    <input type="number" step="1" min="0" class="form-control"
-                                                           name="quantities[1]" id="quantity"
-                                                           placeholder="ادخل الكمية" value="{{ old('quantity') }}"
-                                                           required>
-                                                </div>
-                                            </div>
-                                            <!--end col-->
-                                            {{--                                            <div class="hstack gap-2 justify-content-end col-lg-1 my-3">--}}
-                                            {{--                                                <a class="btn btn-success my-2" href="javascript:deleteEl(1)">@lang('Delete')</a>--}}
-                                            {{--                                            </div>--}}
-                                        </div>
-                                        <!--end row-->
-                                    </div>
-                                @endif
+                               @else
+    <div id="1">
+        <div class="row">
+            <!-- Quantity -->
+            <div class="col-md-6 mb-3">
+                <label for="quantity" class="form-label">@lang('Quantity')</label>
+                <input type="number" step="1" min="0" class="form-control"
+                       name="quantities[1]" id="quantity"
+                       placeholder="@lang('Enter Quantity')" value="{{ old('quantities.1') }}" required>
+            </div>
+
+            <!-- Price -->
+            <div class="col-md-6 mb-3">
+                <label for="price" class="form-label">@lang('Price')</label>
+                <input type="number" step="0.01" min="0" class="form-control"
+                       name="prices[1]" id="price"
+                       placeholder="@lang('Enter Price')" value="{{ old('prices.1') }}" required>
+            </div>
+
+
+        </div>
+    </div>
+@endif
+
                             </div>
                             <div id="newForm" style="display: none;">
 
@@ -388,18 +404,27 @@
             count++;
             var div1 = document.createElement('div');
             div1.id = count;
+var delLink = '<div class="row" id="row-' + count + '">' +
+    // Quantity
+    '<div class="col-md-6 mb-3">' +
+        '<label for="quantity" class="form-label">@lang("Quantity")</label>' +
+        '<input type="number" step="1" min="0" class="form-control" name="quantities[' + count + ']" placeholder="@lang("Enter Quantity")" required>' +
+    '</div>' +
 
-            var delLink = '<div class="row">' +
-                '<div class="col-lg-8">' +
-                '<div class="mb-3">' +
-                '<label for="quantity" class="form-label">@lang("Quantity")</label>' +
-                '<input type="number" step="0.01" min="0" class="form-control" id="quantity" name="quantities[' + count + ']" placeholder="ادخل الكمية" value="" required>' +
-                '</div>' +
-                '</div>' +
-                '<div class="hstack gap-2 justify-content-end col-lg-4 my-3">' +
-                '<a class="btn btn-success my-2" href="javascript:deleteEl(' + count + ')">@lang("Delete")</a>' +
-                '</div>' +
-                '</div>';
+    // Price
+    '<div class="col-md-6 mb-3">' +
+        '<label for="price" class="form-label">@lang("Price")</label>' +
+        '<input type="number" step="0.01" min="0" class="form-control" name="prices[' + count + ']" placeholder="@lang("Enter Price")" required>' +
+    '</div>' +
+
+    // Delete button
+    '<div class="col-lg-12">' +
+        '<div class="hstack gap-2 justify-content-end my-2">' +
+            '<a class="btn btn-success" href="javascript:deleteEl(' + count + ')">@lang("Delete")</a>' +
+        '</div>' +
+    '</div>' +
+'</div>';
+
 
 
             div1.innerHTML = document.getElementById('newForm').innerHTML + delLink;

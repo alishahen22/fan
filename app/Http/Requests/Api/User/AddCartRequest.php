@@ -32,7 +32,22 @@ class AddCartRequest extends FormRequest
 
         return [
             "product_id" => "required|exists:products,id",
-            'quantity' => ['required', "numeric", "min:1"],
+                'quantity' => [
+                    'required',
+                    'exists:product_quantities,id',
+                    function ($attribute, $value, $fail) {
+                        $productId = request('product_id');
+
+                        $match = \DB::table('product_quantities')
+                            ->where('id', $value)
+                            ->where('product_id', $productId)
+                            ->exists();
+
+                        if (! $match) {
+                            $fail('الكمية المختارة لا تنتمي لهذا المنتج.');
+                        }
+                    }
+                ],
             'count' => ['required', "numeric", "min:1"],
             "options_selected" => "nullable|array",
             "options_selected.*" => "required|exists:product_attribute_options,id",

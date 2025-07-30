@@ -23,6 +23,7 @@ class ProductResources extends JsonResource
                 'title' => $this->title,
                 'price' => $this->price,
                 'description' => $this->description,
+                'in_home' =>(bool) $this->in_home,
 //                'is_favorite' => $user ? $user->favourites()->where('product_id', $this->id)->exists() : false,
             ];
     }

@@ -29,9 +29,11 @@ class CartController extends Controller
      */
     public function index(): JsonResponse
     {
-        $cart = Cart::with('designs', 'options')->where('user_id', user_id())->get();
+        $cart = Cart::with('designs', 'options', 'quantityRelation')->where('user_id', user_id())->get();
         $data['items'] = CartResources::collection($cart);
-        $total = collect($data['items'])->sum(fn($item) => $item->price);
+    //   $total = collect($data['items'])->sum(fn($item) => $item->price);
+    $total = $cart->sum(fn($item) => $item->quantityRelation->price ?? 0);
+
         $data['total'] = $total;
         return msgdata(true, trans('lang.success'), $data, ResponseAlias::HTTP_OK);
 

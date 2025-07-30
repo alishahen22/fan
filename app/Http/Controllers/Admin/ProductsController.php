@@ -1,19 +1,19 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Attribute;
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\ProductAttribute;
-use App\Models\ProductImage;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Cart;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Attribute;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use App\Models\ProductAttribute;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Validator;
 
 class ProductsController extends Controller
 {
@@ -29,7 +29,7 @@ class ProductsController extends Controller
     public function index()
     {
         return view('products.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -37,47 +37,50 @@ class ProductsController extends Controller
     {
         return view('products.create', [
             'attributes' => Attribute::active()->get(),
-            'categories' => Category::all()
+            'categories' => Category::all(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title_ar' => 'required|string|max:255',
-            'title_en' => 'required|string|max:255',
-            'desc_ar' => 'nullable|string|max:3000',
-            'desc_en' => 'nullable|string|max:3000',
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
+            'title_ar'             => 'required|string|max:255',
+            'title_en'             => 'required|string|max:255',
+            'desc_ar'              => 'nullable|string|max:3000',
+            'desc_en'              => 'nullable|string|max:3000',
+            'category_id'          => 'required|exists:categories,id',
+        //    'price'                => 'required|numeric|min:0',
             'custom_quantity_from' => 'required|numeric|min:0',
-            'custom_quantity_to' => 'required|numeric|min:0|gte:custom_quantity_from',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'image' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'image_names' => 'nullable',
-            'attributes' => 'nullable|array',
-            'attributes.*' => 'nullable|exists:attributes,id',
+            'custom_quantity_to'   => 'required|numeric|min:0|gte:custom_quantity_from',
+            'discount'             => 'nullable|numeric|min:0|max:100',
+            'image'                => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_names'          => 'nullable',
+            'attributes'           => 'nullable|array',
+            'attributes.*'         => 'nullable|exists:attributes,id',
 
-            'quantities' => 'required|array',
-            'quantities.*' => 'required|numeric|min:0',
+            'quantities'           => 'required|array',
+            'quantities.*'         => 'required|numeric|min:0',
+
+            'prices'               => 'required|array',
+            'prices.*'             => 'required|numeric|min:1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $product = Product::create([
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
-            'desc_ar' => $request->desc_ar,
-            'desc_en' => $request->desc_en,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
+            'title_ar'             => $request->title_ar,
+            'title_en'             => $request->title_en,
+            'desc_ar'              => $request->desc_ar,
+            'desc_en'              => $request->desc_en,
+            'category_id'          => $request->category_id,
+            'price'                => $request->prices[1] ?? 0, // Assuming the first price is the main price
             'custom_quantity_from' => $request->custom_quantity_from,
-            'custom_quantity_to' => $request->custom_quantity_to,
-            'discount' => $request->discount,
-            'image' => $request->image,
-            'is_active' => $request->has('is_active')
+            'custom_quantity_to'   => $request->custom_quantity_to,
+            'discount'             => $request->discount,
+            'image'                => $request->image,
+            'is_active'            => $request->has('is_active'),
         ]);
 
         // save product attributes
@@ -86,9 +89,19 @@ class ProductsController extends Controller
             $product->attributes()->createMany($attributes);
         }
         // save product quantities
-        if ($request->filled('quantities') && is_array($request['quantities'])) {
-            $quantities = collect($request['quantities'])->map(fn($id) => ['quantity' => $id]);
-            $product->quantities()->createMany($quantities);
+        if ($request->filled('quantities') && is_array($request['quantities']) && is_array($request['prices'])) {
+            $quantities = $request['quantities'];
+            $prices     = $request['prices'];
+
+            $data = [];
+
+            foreach ($quantities as $key => $quantity) {
+                $data[] = [
+                    'quantity' => $quantity,
+                    'price'    => $prices[$key] ?? 0, // fallback to 0 if price not set
+                ];
+            }
+            $product->quantities()->createMany($data);
         }
         // save product gallery
         if ($request->filled('image_names')) {
@@ -107,49 +120,51 @@ class ProductsController extends Controller
         $productAttributes = ProductAttribute::where('product_id', $id)->pluck('attribute_id')->toArray();
 
         return view('products.edit', [
-            'product' => Product::findOrFail($id),
-            'attributes' => Attribute::active()->get(),
-            'categories' => Category::all(),
-            'productAttributes' => $productAttributes
+            'product'           => Product::findOrFail($id),
+            'attributes'        => Attribute::active()->get(),
+            'categories'        => Category::all(),
+            'productAttributes' => $productAttributes,
         ]);
     }
 
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'title_ar' => 'required|string|max:255',
-            'title_en' => 'required|string|max:255',
-            'desc_ar' => 'nullable|string|max:3000',
-            'desc_en' => 'nullable|string|max:3000',
-            'category_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:100',
+            'title_ar'             => 'required|string|max:255',
+            'title_en'             => 'required|string|max:255',
+            'desc_ar'              => 'nullable|string|max:3000',
+            'desc_en'              => 'nullable|string|max:3000',
+            'category_id'          => 'required|exists:categories,id',
+            // 'price'                => 'required|numeric|min:0',
+            'discount'             => 'nullable|numeric|min:0|max:100',
             'custom_quantity_from' => 'required|numeric|min:0',
-            'custom_quantity_to' => 'required|numeric|min:0|gte:custom_quantity_from',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'image_names' => 'nullable',
-            'quantities' => 'required|array',
-            'quantities.*' => 'required|numeric|min:0',
+            'custom_quantity_to'   => 'required|numeric|min:0|gte:custom_quantity_from',
+            'image'                => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_names'          => 'nullable',
+            'quantities'           => 'required|array',
+            'quantities.*'         => 'required|numeric|min:0',
+
+            'prices'               => 'required|array',
+            'prices.*'             => 'required|numeric|min:1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $product = Product::findOrFail($id);
-
         $product->update([
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
-            'desc_ar' => $request->desc_ar,
-            'desc_en' => $request->desc_en,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-            'discount' => $request->discount,
+            'title_ar'             => $request->title_ar,
+            'title_en'             => $request->title_en,
+            'desc_ar'              => $request->desc_ar,
+            'desc_en'              => $request->desc_en,
+            'category_id'          => $request->category_id,
+            'price'                => $request->prices[1] ?? 0, // Assuming the first price is the main price
+            'discount'             => $request->discount,
             'custom_quantity_from' => $request->custom_quantity_from,
-            'custom_quantity_to' => $request->custom_quantity_to,
-            'image' => $request->image,
-            'is_active' => $request->has('is_active')
+            'custom_quantity_to'   => $request->custom_quantity_to,
+            'image'                => $request->image,
+            'is_active'            => $request->has('is_active'),
         ]);
 
         // Update product gallery images if provided
@@ -161,11 +176,33 @@ class ProductsController extends Controller
             }
         }
         // save product quantities
-        if ($request->filled('quantities') && is_array($request['quantities'])) {
-            $product->quantities()->delete();
-            $quantities = collect($request['quantities'])->map(fn($id) => ['quantity' => $id]);
-            $product->quantities()->createMany($quantities);
+        if (
+            $request->filled('quantities') &&
+            is_array($request['quantities']) &&
+            is_array($request['prices'])
+        ) {
+            // حذف الكميات القديمة
+            //get the existing quantities
+           $product->quantities()->delete();
+
+            $quantities = $request['quantities'];
+            $prices     = $request['prices'];
+
+            $data = [];
+
+            foreach ($quantities as $key => $quantity) {
+                $data[] = [
+                    'quantity' => $quantity,
+                    'price'    => $prices[$key] ?? 0, // fallback إلى 0 لو السعر مش موجود
+                ];
+            }
+
+            // إدخال القيم الجديدة
+            $product->quantities()->createMany($data);
         }
+
+        Cart::where('product_id', $product->id)->delete();
+
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -181,7 +218,6 @@ class ProductsController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -189,12 +225,12 @@ class ProductsController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:products,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
             Product::whereIn('id', $ids)->delete();
@@ -210,17 +246,17 @@ class ProductsController extends Controller
     public function bulkChangeStatus(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:products,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
 
             Product::whereIn('id', $ids)->update([
-                'is_active' => $request->is_active ?? 0
+                'is_active' => $request->is_active ?? 0,
             ]);
 
         } catch (\Exception $e) {
@@ -245,10 +281,10 @@ class ProductsController extends Controller
                 ';
             })
             ->editColumn('price', function ($row) {
-                if($row->discount > 0){
-                    return '<s>'.$row->price_original.'</s> - '.$row->price . ' ' . trans('SAR');
+                if ($row->discount > 0) {
+                    return '<s>' . $row->price_original . '</s> - ' . $row->price . ' ' . trans('SAR');
 
-                }else{
+                } else {
                     return $row->price . ' ' . trans('SAR');
 
                 }
@@ -257,12 +293,11 @@ class ProductsController extends Controller
                 return $row->category->title;
             })
             ->editColumn('is_active', function ($row) {
-                $isChecked = $row->is_active ? 'checked' : '';
-//                $isDisabled = auth()->user()->hasPermission('products_change_status') ? '' : 'disabled';
+                $isChecked = $row->in_home ? 'checked' : '';
 
                 return '
                     <div class="form-check form-switch form-switch-right form-switch-md">
-                        <input class="form-check-input switch-status" data-id="' . $row->id . '" name="is_active" value="1" type="checkbox" ' . $isChecked . '  id="input-group-showcode">
+                        <input class="form-check-input switch-status" data-id="' . $row->id . '" name="is_active" value="1" type="checkbox" ' . $isChecked . ' id="input-group-showcode">
                     </div>
                 ';
             })
@@ -304,7 +339,7 @@ class ProductsController extends Controller
             ->addColumn('attributes_btn', function ($data) {
                 return view('products.parts.attributes_btn', compact('data'));
             })
-            ->rawColumns(['select', 'image', 'is_active', 'action', 'category','price'])
+            ->rawColumns(['select', 'image', 'is_active', 'action', 'category', 'price'])
             ->make();
     }
 
@@ -342,18 +377,16 @@ class ProductsController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:products,id',
+            'id'        => 'required|exists:products,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
         $product = Product::findOrFail($request->id);
-        $product->is_active = $request->is_active;
-        $product->save();
-
+        $product->update(['in_home' => $request->is_active]);
         return response()->json(['success' => __('Operation Done Successfully')]);
     }
 
@@ -368,7 +401,7 @@ class ProductsController extends Controller
             ['data' => 'price', 'name' => 'price', 'label' => trans('Price')],
             ['data' => 'attributes_btn', 'name' => 'attributes_btn', 'label' => trans('attributes'), 'orderable' => false, 'searchable' => false],
             ['data' => 'created_at', 'name' => 'created_at', 'label' => trans('Created At')],
-            ['data' => 'is_active', 'name' => 'is_active', 'label' => trans('Active')],
+            ['data' => 'is_active', 'name' => 'in_home', 'label' => trans('الرئيسية')],
             ['data' => 'action', 'name' => 'action', 'label' => trans('Action')],
         ];
     }
@@ -379,7 +412,7 @@ class ProductsController extends Controller
             'image' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => true, 'message' => __('Operation Failed')]);
         }
         $fileName = upload($request->image, 'products');
@@ -391,10 +424,10 @@ class ProductsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
-            'image_id' => 'required|exists:product_images,id',
+            'image_id'   => 'required|exists:product_images,id',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => true, 'message' => __('Operation Failed')]);
         }
         $image = ProductImage::where('id', $request->image_id)

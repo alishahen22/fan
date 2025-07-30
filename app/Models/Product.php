@@ -23,6 +23,7 @@ class Product extends Model
         'is_active',
         'custom_quantity_from',
         'custom_quantity_to',
+        'in_home',
     ];
 
     protected $appends = ['title', 'description', 'price_original'];

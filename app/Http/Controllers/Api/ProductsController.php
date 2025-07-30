@@ -33,7 +33,7 @@ class ProductsController extends Controller
             ->when($request->category_id, function ($w) use ($request) {
                 $w->where('category_id', $request->category_id);
             })
-            ->paginate(Config('app.paginate'));
+            ->paginate(12);
         $data = ProductResources::collection($products)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $data, ResponseAlias::HTTP_OK);
     }
