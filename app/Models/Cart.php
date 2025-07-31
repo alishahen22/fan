@@ -20,13 +20,13 @@ class Cart extends Model
 
     public function getPriceAttribute(){
 
-        $price = $this->product->price;
+        $price = $this->quantityRelation->price;
         if (isset($this->options)) {
             foreach ($this->options as $key => $row) {
                 $price += $row->option->price;
             }
         }
-        $price = $price * $this->quantity;
+     //   $price = $price * $this->quantity;
         $price = $price * $this->count;
         return $price ;
     }

@@ -25,6 +25,7 @@ class CartResources extends JsonResource
             'quantity' => $this->quantityRelation?->quantity ?? null,
             'count' => $this->count,
             'price' => (int) $this->quantityRelation?->price ?? 0,
+            'total_price' => (int) $this->price
 
         ];
     }

@@ -30,8 +30,8 @@ class UserResource extends JsonResource
             'points' => $this->points,
             'customer_type' => $this->customer_type,
             'commercial_register' => $this->commercial_register,
-            'commercial_register_image' => $this->commercial_register_image ? asset('storage/' . $this->commercial_register_image) : null,
-            'tax_number_image' => $this->   tax_number_image ? asset('storage/' . $this->tax_number_image) : null,
+            'commercial_register_image' => $this->commercial_register_image ,
+            'tax_number_image' => $this->   tax_number_image ,
             'tax_number' => $this->tax_number,
             'owner_name' => $this->owner_name,
 

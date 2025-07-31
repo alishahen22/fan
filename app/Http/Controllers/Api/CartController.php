@@ -31,10 +31,12 @@ class CartController extends Controller
     {
         $cart = Cart::with('designs', 'options', 'quantityRelation')->where('user_id', user_id())->get();
         $data['items'] = CartResources::collection($cart);
-    //   $total = collect($data['items'])->sum(fn($item) => $item->price);
-    $total = $cart->sum(fn($item) => $item->quantityRelation->price ?? 0);
-
-        $data['total'] = $total;
+       $total = collect($data['items'])->sum(fn($item) => $item->price);
+ //   $total = $cart->sum(fn($item) => $item->quantityRelation->price  * $item->count );
+        $tax = settings("tax_percent") ?? 0;
+        $data['tax'] = ($total * $tax / 100);
+        $data['subtotal'] = $total;
+        $data['total'] = $total + $data['tax'];
         return msgdata(true, trans('lang.success'), $data, ResponseAlias::HTTP_OK);
 
     }

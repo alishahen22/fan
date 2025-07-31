@@ -157,10 +157,10 @@ class OrdersController extends Controller
 //        Calculate cart total
         $address = Address::where('id',$request['address_id'])->first();
         $shipping_cost = $address->Area->cost ;
-        $cart = Cart::with('designs', 'options')->where('user_id', user_id())->get();
+        $cart = Cart::with('designs', 'options' , 'quantityRelation')->where('user_id', user_id())->get();
         $cart_resource = CartResources::collection($cart);
+    //   $total = $cart->sum(fn($item) => $item->quantityRelation->price ?? 0);
         $total = collect($cart_resource)->sum(fn($item) => $item->price);
-
 //check cart has items
         if (count($cart) == 0) {
             return msg(false, trans('lang.should_add_items_in_cart'), ResponseAlias::HTTP_BAD_REQUEST);
@@ -169,7 +169,7 @@ class OrdersController extends Controller
         $price_before_tax = $total;
         $tax = settings("tax_percent") ?? 0;
         $product_tax = ($price_before_tax * $tax / 100);
-
+ //       dd($product_tax , $price_before_tax);
         $request['order_number'] = Carbon::now()->year . '000' . Order::max('id') + 1;
         $request['user_id'] = user_id();
         $request['sub_total'] = $total;  // add here cart total before tax and discount .
@@ -209,18 +209,15 @@ class OrdersController extends Controller
                 return msg(false, trans('lang.you not have enough money in your wallet to use'), ResponseAlias::HTTP_NOT_ACCEPTABLE);
             }
         }
-
         $order = Order::create($request);
-
         if ($order) {
 //            save order items
             foreach ($cart as $item) {
-                $order_item_data['order_id'] = $order->id;
+               $order_item_data['order_id'] = $order->id;
                 $order_item_data['product_id'] = $item->product_id;
-                $order_item_data['count'] = $item->quantity;
-                $order_item_data['quantity'] = $item->quantity;
+                $order_item_data['count'] = $item->count;
+                $order_item_data['quantity'] = $item->quantityRelation?->quantity;
                 $order_item_data['price'] = $item->price;
-
                 $order_item = OrderItem::create($order_item_data);
                 foreach ($item->options as $option) {
                     $selected_option = ProductAttributeOption::whereId($option->option->id)->first();
