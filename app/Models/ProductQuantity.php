@@ -14,4 +14,28 @@ class ProductQuantity extends Model
         'quantity',
         'price',
         ];
-}
+
+
+    protected $appends = ['price_original'];
+     public function getPriceAttribute()
+    {
+        $price = $this->attributes['price'];
+        if ($this->product?->discount > 0) {
+            $discount_amount = $price * ($this->product?->discount / 100);
+            $price = $price - $discount_amount;
+        }
+        return $price;
+    }
+
+    //get price before discount
+    public function getPriceOriginalAttribute()
+    {
+        return $this->attributes['price'];
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    }

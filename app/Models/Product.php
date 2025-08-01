@@ -28,10 +28,7 @@ class Product extends Model
 
     protected $appends = ['title', 'description', 'price_original'];
 
-    public function getPriceOriginalAttribute()
-    {
-        return $this->attributes['price'];
-    }
+
 
     public function getPriceAttribute()
     {
@@ -41,6 +38,12 @@ class Product extends Model
             $price = $price - $discount_amount;
         }
         return $price;
+    }
+
+       //get price before discount
+    public function getPriceOriginalAttribute()
+    {
+        return $this->attributes['price'];
     }
 
     public function getTitleAttribute()

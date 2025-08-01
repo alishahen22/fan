@@ -74,11 +74,16 @@ Route::prefix('client')->group(function () {
             Route::get('/not-print-products', [HomeController::class, 'notPrintProducts']);
             Route::get('/print-products', [HomeController::class, 'printProducts']);
             Route::get('/products', [HomeController::class, 'products']);
+            Route::get('/offers/products', [HomeController::class, 'ProductsOffers']);
+
+
         });
 
-            Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
+        Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
 
         Route::get('/offers', [HomeController::class, 'allOffers']);
+
+        //
 
 
         Route::get('/categories', [HomeController::class, 'allCategories']);
@@ -90,6 +95,7 @@ Route::prefix('client')->group(function () {
             Route::post('/calculate/price', [ProductsController::class, 'calculatePrice']);
             Route::get('/{id}', [ProductsController::class, 'show']);
             Route::get('/categories/list', [ProductsController::class, 'categories']);
+
         });
 
     });

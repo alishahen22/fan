@@ -213,4 +213,14 @@ class HomeController extends Controller
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
+    //ProductsOffers
+
+    public function ProductsOffers(): JsonResponse
+    {
+        $data = Product::active()->where('discount', '>', 0)->paginate(20);
+
+        $result = ProductResources::collection($data)->response()->getData(true);
+        return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
+    }
+
 }
