@@ -123,11 +123,12 @@ class OrdersController extends Controller
 
             $price_before_tax = $request['total'];
             $tax = settings("tax_percent") ?? 0;
-            $product_tax = ($price_before_tax * $tax / 100);
+           $product_tax = ($price_before_tax * $tax / 100);
+            //$product_tax = ($price_before_tax / 100);
             $final_total = $request['total'] + $product_tax;
 
             if ($voucher->voucher_used_count < $voucher->use_count) {
-                $discount_amount = ($voucher->percent / 100) * $final_total;
+                $discount_amount = ($voucher->percent / 100) * $price_before_tax;
                 $data['sub_total'] = round($request['total'], 2);
                 $data['tax'] = round($product_tax, 2);
                 $data['percent'] = round($voucher->percent, 2);
@@ -191,7 +192,7 @@ class OrdersController extends Controller
                 }
                 //End Check
                 if ($voucher->voucher_used_count < $voucher->use_count) {
-                    $discount_amount = ($voucher->percent / 100) * $final_total;
+                    $discount_amount = ($voucher->percent / 100) * $total;
                     $voucher_added = true;
                     $request['discount'] = $discount_amount;
                     $request['total'] = $final_total - $discount_amount;
