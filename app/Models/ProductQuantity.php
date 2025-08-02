@@ -19,13 +19,18 @@ class ProductQuantity extends Model
     protected $appends = ['price_original'];
      public function getPriceAttribute()
     {
-        $price = $this->attributes['price'];
-        if ($this->product?->discount > 0) {
-            $discount_amount = $price * ($this->product?->discount / 100);
-            $price = $price - $discount_amount;
-        }
-        return $price;
-    }
+
+
+       //check i user not in dashboard
+       if (in_array(auth()->user()?->type, ['admin', 'assistant', 'printer'])) {
+        return $this->attributes['price'];
+       }
+       $price = $this->attributes['price'];
+       if ($this->product?->discount > 0) {
+           $discount_amount = $price * ($this->product?->discount / 100);
+           $price = $price - $discount_amount;
+       }
+       return $price;    }
 
     //get price before discount
     public function getPriceOriginalAttribute()

@@ -57,6 +57,7 @@ Route::prefix('client')->group(function () {
             Route::get('/settings', [SettingsController::class, 'settings']);
             Route::get('/settings/{key}', [SettingsController::class, 'custom_settings']);
             Route::post('/contact-us', [SettingsController::class, 'contactUs']);
+            Route::get('/seo/{page_type}', [SettingsController::class, 'seo']);
         });
 
 
@@ -82,6 +83,7 @@ Route::prefix('client')->group(function () {
         Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
 
         Route::get('/offers', [HomeController::class, 'allOffers']);
+        Route::get('/offers/products', [HomeController::class, 'offersProducts']);
 
         //
 

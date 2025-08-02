@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\User\ContactUsRequest;
-use App\Http\Resources\Api\User\PagesResources;
-use App\Http\Resources\Api\User\SettingsResources;
-use App\Models\Contact;
 use App\Models\Page;
+use App\Models\Contact;
 use App\Models\Setting;
-use Illuminate\Http\JsonResponse;
+use App\Models\SeoSettings;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\SeoResource;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\User\PagesResources;
+use App\Http\Requests\Api\User\ContactUsRequest;
+use App\Http\Resources\Api\User\SettingsResources;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 /**
@@ -73,5 +75,14 @@ class SettingsController extends Controller
         $data = $request->validated();
         Contact::create($data);
         return msg(true, trans('lang.success'), ResponseAlias::HTTP_OK);
+    }
+
+
+    //seo
+    public function seo($page_type): JsonResponse
+    {
+        $seo = SeoSettings::where('page_type', $page_type)->first();
+        $data = new SeoResource($seo);
+        return msgdata(true, trans('lang.success'), $data, Response::HTTP_OK);
     }
 }

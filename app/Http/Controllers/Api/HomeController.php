@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -30,10 +29,8 @@ use App\Models\Step;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
-
 class HomeController extends Controller
 {
-
 
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -47,7 +44,7 @@ class HomeController extends Controller
             if (isset($inputs['files'])) {
                 foreach ($inputs['files'] as $file) {
                     $data['direct_order_id'] = $order->id;
-                    $data['file'] = $file;
+                    $data['file']            = $file;
                     DirectOrderFile::create($data);
                 }
             }
@@ -61,14 +58,14 @@ class HomeController extends Controller
      */
     public function getPrice(GetPriceRequest $request): JsonResponse
     {
-        $inputs = $request->validated();
+        $inputs            = $request->validated();
         $inputs['user_id'] = user_id();
-        $order = GetPrice::create($inputs);
+        $order             = GetPrice::create($inputs);
         if ($order) {
             if (isset($inputs['files'])) {
                 foreach ($inputs['files'] as $file) {
                     $data['get_price_id'] = $order->id;
-                    $data['file'] = $file;
+                    $data['file']         = $file;
                     GetPriceFile::create($data);
                 }
             }
@@ -82,40 +79,39 @@ class HomeController extends Controller
      */
     public function articles(): JsonResponse
     {
-        $medical = Article::paginate(20);
-        $result = ArticleResources::collection($medical)->response()->getData(true);
+        $medical = Article::paginate(3);
+        $result  = ArticleResources::collection($medical)->response()->getData(true);
         //    most sell service API
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function sliders(): JsonResponse
     {
-        $data = Slider::active()->get();
+        $data   = Slider::active()->get();
         $result = SlidersResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function banners(): JsonResponse
     {
-        $data = Banner::active()->get();
+        $data   = Banner::active()->get();
         $result = SlidersResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function steps(): JsonResponse
     {
-        $data = Step::orderBy('id', 'asc')->get();
+        $data   = Step::orderBy('id', 'asc')->get();
         $result = StepsResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function reviews(): JsonResponse
     {
-        $data = Review::active()->orderBy('id', 'asc')->get();
+        $data   = Review::active()->orderBy('id', 'asc')->get();
         $result = ReviewResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
-
 
     public function notPrintProducts(): JsonResponse
     {
@@ -126,7 +122,7 @@ class HomeController extends Controller
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
-      public function printProducts(): JsonResponse
+    public function printProducts(): JsonResponse
     {
         $data = Product::whereHas('category', function ($q) {
             $q->where('type', 'printing');
@@ -135,46 +131,44 @@ class HomeController extends Controller
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
-
-
     public function offers(): JsonResponse
     {
-        $data = Offer::active()->orderBy('id', 'asc')->get();
+        $data   = Offer::active()->orderBy('id', 'asc')->get();
         $result = OfferResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function allOffers(): JsonResponse
     {
-        $data = Offer::active()->orderBy('id', 'asc')->paginate(20);
+        $data   = Offer::active()->orderBy('id', 'asc')->paginate(3);
         $result = OfferResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function about(): JsonResponse
     {
-        $data = Page::whereType('about')->first();
+        $data   = Page::whereType('about')->first();
         $result = new SlidersResources($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function categories(): JsonResponse
     {
-        $data = Category::orderBy('id', 'asc')->active()->get()->take(7);
+        $data   = Category::orderBy('id', 'asc')->active()->get()->take(7);
         $result = CategoriesResources::collection($data);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function allCategories(): JsonResponse
     {
-        $data = Category::orderBy('id', 'asc')->active()->paginate(20);
+        $data   = Category::orderBy('id', 'asc')->active()->paginate(3);
         $result = CategoriesResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function categoriesByType($type): JsonResponse
     {
-        $data = Category::where('type', $type)->orderBy('id', 'asc')->active()->paginate(20);
+        $data   = Category::where('type', $type)->orderBy('id', 'asc')->active()->paginate(3);
         $result = CategoriesResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
@@ -193,21 +187,19 @@ class HomeController extends Controller
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
-
     //categoryProducts
     public function categoryProducts($type): JsonResponse
     {
         $data = Product::whereHas('category', function ($q) use ($type) {
             $q->where('type', $type);
-        })->active()->paginate(20);
+        })->active()->paginate(3);
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
-            }
-
+    }
 
     public function products(): JsonResponse
     {
-        $data = Product::active()->where('in_home', true)->paginate(20);
+        $data = Product::active()->where('in_home', true)->where('discount', 0)->get();
 
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
@@ -217,8 +209,16 @@ class HomeController extends Controller
 
     public function ProductsOffers(): JsonResponse
     {
-        $data = Product::active()->where('discount', '>', 0)->paginate(20);
+        $data = Product::active()->where('discount', '>', 0)->where('in_home', true)->get();
 
+        $result = ProductResources::collection($data)->response()->getData(true);
+        return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
+    }
+
+    // offersProducts
+    public function offersProducts(): JsonResponse
+    {
+         $data = Product::active()->where('discount', '>', 0)->paginate(3);
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }

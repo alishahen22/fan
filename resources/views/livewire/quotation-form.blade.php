@@ -206,7 +206,7 @@
 
             <div class="modal-header text-white">
                 <h5 class="modal-title">➕ إضافة صنف جديد</h5>
-                <button type="button" class="btn-close btn-close-red" wire:click="$set('showAddItemModal', false)"></button>
+                <button type="button" class="btn-close btn-close-red" wire:click="closeModal"></button>
             </div>
 
             <div class="modal-body p-4">
@@ -215,12 +215,12 @@
                     {{-- الأصناف --}}
              <div class="col-md-12 mb-3">
                 <label class="form-label fw-bold">بحث عن مادة خام</label>
-                <input type="text" wire:model="searchItem"   class="form-control" placeholder="ابحث بالاسم...">
+                <input type="text" wire:model.live="searchItem" class="form-control" placeholder="ابحث بالاسم...">
             </div>
 
             <div class="col-md-12">
                 <label class="form-label fw-bold">المواد الخام <small class="text-muted">(يمكن اختيار أكثر من واحد)</small></label>
-                <select wire:model="newItem.item_ids" multiple class="form-select" size="5">
+                <select wire:model="newItem.item_ids" multiple class="form-select select2-items" size="5">
                     @forelse($itemsList as $item)
                         <option value="{{ $item->id }}">
                             {{ $item->name_ar }} ({{ $item->width_cm }}×{{ $item->height_cm }} سم - {{ number_format($item->price, 2) }} ر.س)
@@ -264,8 +264,11 @@
 
                     {{-- المستلزمات --}}
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">المستلزمات <small class="text-muted">(يمكن اختيار أكثر من واحدة)</small></label>
-                        <select wire:model="newItem.supplies" multiple class="form-select" size="5">
+                        <label class="form-label fw-bold">بحث عن مستلزمات</label>
+                        <input type="text" wire:model.live="searchSupply" class="form-control" placeholder="ابحث بالاسم...">
+
+                        <label class="form-label fw-bold mt-3">المستلزمات <small class="text-muted">(يمكن اختيار أكثر من واحدة)</small></label>
+                        <select wire:model="newItem.supplies" multiple class="form-select select2-supplies" size="5">
                             @foreach($suppliesList as $supply)
                                 <option value="{{ $supply->id }}">
                                     {{ $supply->name_ar }} — {{ number_format($supply->price, 2) }} ر.س
@@ -289,7 +292,7 @@
             </div>
 
             <div class="modal-footer justify-content-between">
-                <button wire:click="$set('showAddItemModal', false)" class="btn btn-outline-secondary">❌ إلغاء</button>
+                <button wire:click="closeModal" class="btn btn-outline-secondary">❌ إلغاء</button>
                 <button wire:click="addItem" class="btn btn-success">✅ إضافة</button>
             </div>
 
@@ -298,7 +301,91 @@
 </div>
 @endif
 
+{{-- Select2 Library --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<style>
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    min-height: 38px;
+}
 
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #007bff;
+    border: 1px solid #0056b3;
+    border-radius: 4px;
+    color: white;
+    padding: 2px 8px;
+    margin: 2px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 5px;
+}
+
+.select2-dropdown {
+    z-index: 9999;
+}
+
+.select2-container--open .select2-dropdown {
+    z-index: 9999;
+}
+</style>
+
+<script>
+document.addEventListener('livewire:init', () => {
+    // Initialize Select2 when modal opens
+    Livewire.on('modal-opened', () => {
+        // Wait a bit for the modal to be fully rendered
+        setTimeout(() => {
+            // Initialize Select2 for items
+            $('.select2-items').select2({
+                placeholder: 'اختر المواد الخام...',
+                allowClear: true,
+                dir: 'rtl',
+                language: 'ar',
+                width: '100%',
+                dropdownParent: $('.modal-body'),
+                closeOnSelect: false,
+                multiple: true
+            });
+
+            // Initialize Select2 for supplies
+            $('.select2-supplies').select2({
+                placeholder: 'اختر المستلزمات...',
+                allowClear: true,
+                dir: 'rtl',
+                language: 'ar',
+                width: '100%',
+                dropdownParent: $('.modal-body'),
+                closeOnSelect: false,
+                multiple: true
+            });
+
+            // Handle Select2 change events
+            $('.select2-items').on('change', function() {
+                @this.set('newItem.item_ids', $(this).val());
+            });
+
+            $('.select2-supplies').on('change', function() {
+                @this.set('newItem.supplies', $(this).val());
+            });
+        }, 100);
+    });
+
+    // Clean up Select2 when modal closes
+    Livewire.on('modal-closed', () => {
+        if ($('.select2-items').length) {
+            $('.select2-items').select2('destroy');
+        }
+        if ($('.select2-supplies').length) {
+            $('.select2-supplies').select2('destroy');
+        }
+    });
+});
+</script>
 
 </div>

@@ -19,6 +19,7 @@ class ProductQuantitiesResources extends JsonResource
             [
                 'id' => $this->id,
                 'quantity' => $this->quantity,
+                'original_price' => (int) $this->price_original,
                 'price' =>(int) $this->price,
             ];
     }
