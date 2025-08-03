@@ -33,7 +33,7 @@ class Order extends Model
     use HasFactory;
 
     const STATUS = ['pending', 'in_progress','in_way', 'complete', 'cancelled'];
-    const PAYMENT_METHOD = ['credit', 'cash', 'wallet', 'apple', 'mada'];
+    const PAYMENT_METHOD = [ 'cash', 'credit', 'apple', 'mada'];
     const PAYMENT_STATUS = ['partial_paid', 'paid', 'unpaid'];
 
     protected $appends = ['quantity'];

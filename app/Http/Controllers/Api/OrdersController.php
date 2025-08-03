@@ -2,33 +2,35 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\User\CancelOrderRequest;
-use App\Http\Requests\Api\User\ExecutePayRequest;
-use App\Http\Requests\Api\User\OrderApplyVoucherRequest;
-use App\Http\Requests\Api\User\OrderComplainRequest;
-use App\Http\Requests\Api\User\OrderDetailsRequest;
-use App\Http\Requests\Api\User\OrderIndexRequest;
-use App\Http\Requests\Api\User\OrderPlaceRequest;
-use App\Http\Requests\Api\User\OrderRateRequest;
-use App\Http\Resources\Api\User\CartResources;
-use App\Http\Resources\Api\User\OrderDetailsResources;
-use App\Http\Resources\Api\User\OrderResources;
-use App\Models\Address;
+use Carbon\Carbon;
 use App\Models\Cart;
+use App\Models\User;
 use App\Models\Order;
+use App\Models\Address;
+use App\Models\Setting;
+use App\Models\Voucher;
 use App\Models\OrderItem;
+use App\Models\UserPoint;
+use App\Models\VoucherUser;
+use Illuminate\Http\Response;
 use App\Models\OrderItemDesign;
 use App\Models\OrderItemOption;
-use App\Models\ProductAttributeOption;
-use App\Models\Setting;
-use App\Models\User;
-use App\Models\UserPoint;
-use App\Models\Voucher;
-use App\Models\VoucherUser;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use App\Services\MyFatoorahService;
+use App\Http\Controllers\Controller;
+use App\Models\ProductAttributeOption;
+use MyFatoorah\Laravel\Facade as MyFatoorah;
+use App\Http\Resources\Api\User\CartResources;
+use App\Http\Resources\Api\User\OrderResources;
+use App\Http\Requests\Api\User\OrderRateRequest;
+use App\Http\Requests\Api\User\ExecutePayRequest;
+use App\Http\Requests\Api\User\OrderIndexRequest;
+use App\Http\Requests\Api\User\OrderPlaceRequest;
+use App\Http\Requests\Api\User\CancelOrderRequest;
+use App\Http\Requests\Api\User\OrderDetailsRequest;
+use App\Http\Requests\Api\User\OrderComplainRequest;
+use App\Http\Resources\Api\User\OrderDetailsResources;
+use App\Http\Requests\Api\User\OrderApplyVoucherRequest;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 
@@ -240,34 +242,62 @@ class OrdersController extends Controller
                 $user->save();
 
             }
-            //calculate user points
 
-            $order_money = settings('order_money');
-            $order_points = settings('order_points');
+            if ($request['payment_method'] == 'credit') {
+                $invoiceData = [
+                    'CustomerName'       => $user->name,
+                    'InvoiceValue'       => $order->total,
+                    'DisplayCurrencyIso' =>    'SAR', // العملة',
+                    'CustomerEmail'      => $user->email ,
+                    'MobileCountryCode'  => '+966',
+                    'CustomerMobile'     => $user->phone ?? '0000000000',
+                    'CallbackUrl'        => url('payment/callback'),   // دا الرابط اللي MyFatoorah هيرجع عليه بعد الدفع
+                    'ErrorUrl'           => url('payment/failed'),
+                    'Language'           => 'en',
+                    'CustomerReference'  => (string) $order->id,
+                ];
 
-            $avg_reward = $order->total / $order_money;
-            $points = $avg_reward * $order_points;
-            $user = User::whereId($userId)->first();
-            $user->points += $points;
-            $user->save();
+                $payment = app(MyFatoorahService::class)->createInvoice($order);
+                
+                $order->invoice_id = $payment['InvoiceId'] ?? null;
+                $order->save();
+                $paymentLink = $payment['PaymentURL'];
+                $order->paymentLink =  $paymentLink; // رابط الدفع
+                
+            }
+            
 
-            //save user points transactions ...
-            $user_point_transactions['user_id'] = user_id();
-            $user_point_transactions['order_id'] = $order->id;
-            $user_point_transactions['points'] = $points;
-            $user_point_transactions['type'] = 'add';
-            $user_point_transactions['money'] = $order->total;
-            UserPoint::create($user_point_transactions);
 
-//            remove all items in cart after order
-            Cart::where('user_id', $userId)->delete();
-            if ($voucher_added) {
-                $voucher_user_data['user_id'] = user_id();
-                $voucher_user_data['voucher_id'] = $voucher->id;
-                VoucherUser::create($voucher_user_data);
 
-                $voucher->voucher_used_count = $voucher->voucher_used_count + 1;
-                $voucher->save();
+            if ($request['payment_method'] == 'cash') {
+                
+                $order_money = settings('order_money');
+                $order_points = settings('order_points');
+    
+                $avg_reward = $order->total / $order_money;
+                $points = $avg_reward * $order_points;
+                $user = User::whereId($userId)->first();
+                $user->points += $points;
+                $user->save();
+    
+                //save user points transactions ...
+                $user_point_transactions['user_id'] = user_id();
+                $user_point_transactions['order_id'] = $order->id;
+                $user_point_transactions['points'] = $points;
+                $user_point_transactions['type'] = 'add';
+                $user_point_transactions['money'] = $order->total;
+                UserPoint::create($user_point_transactions);
+    
+    //            remove all items in cart after order
+                Cart::where('user_id', $userId)->delete();
+                if ($voucher_added) {
+                    $voucher_user_data['user_id'] = user_id();
+                    $voucher_user_data['voucher_id'] = $voucher->id;
+                    VoucherUser::create($voucher_user_data);
+    
+                    $voucher->voucher_used_count = $voucher->voucher_used_count + 1;
+                    $voucher->save();
+                }
             }
         }
 

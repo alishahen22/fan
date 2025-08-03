@@ -73,6 +73,17 @@ class SeoSettingsSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
+               [
+                'page_type' => 'offers',
+                'title' => 'Special Offers - FaNN Printing Services',
+                'description' => 'Discover our latest special offers and discounts on printing services. Save big on your next order with FaNN.',
+                'keywords' => 'printing offers, special discounts, FaNN promotions, save on printing',
+                'site_name' => 'FaNN',
+                'image' => 'https://admin.fan4d.sa/build/images/side_bar_logo.png',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
     }

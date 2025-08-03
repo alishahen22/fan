@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AddressesController;
-use App\Http\Controllers\Api\SettingsController;
-use App\Http\Controllers\Api\HelpersController;
-use App\Http\Controllers\Api\OrdersController;
-use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CouponsController;
-use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CouponsController;
+use App\Http\Controllers\Api\HelpersController;
+use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OrdersController;
 use App\Http\Controllers\Api\PointsController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProductsController;
+use App\Http\Controllers\Api\SettingsController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,15 +51,13 @@ Route::prefix('client')->group(function () {
             Route::get('/areas/{id}', [HelpersController::class, 'areas']);
         });
 
-
         Route::group(['prefix' => "app"], function () {
-        Route::get('pages/{type}', [SettingsController::class, 'pages']);
+            Route::get('pages/{type}', [SettingsController::class, 'pages']);
             Route::get('/settings', [SettingsController::class, 'settings']);
             Route::get('/settings/{key}', [SettingsController::class, 'custom_settings']);
             Route::post('/contact-us', [SettingsController::class, 'contactUs']);
             Route::get('/seo/{page_type}', [SettingsController::class, 'seo']);
         });
-
 
 //        home Apis
         Route::group(['prefix' => "home"], function () {
@@ -77,7 +75,6 @@ Route::prefix('client')->group(function () {
             Route::get('/products', [HomeController::class, 'products']);
             Route::get('/offers/products', [HomeController::class, 'ProductsOffers']);
 
-
         });
 
         Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
@@ -87,10 +84,8 @@ Route::prefix('client')->group(function () {
 
         //
 
-
         Route::get('/categories', [HomeController::class, 'allCategories']);
         Route::get('/categories/{type}', [HomeController::class, 'categoriesByType']);
-
 
         Route::group(['prefix' => "products"], function () {
             Route::get('/', [ProductsController::class, 'index']);
@@ -101,7 +96,6 @@ Route::prefix('client')->group(function () {
         });
 
     });
-
 
     Route::group(['middleware' => ['user']], function () {
 
@@ -171,5 +165,7 @@ Route::prefix('client')->group(function () {
             Route::get('/', [CouponsController::class, 'index']);
         });
     });
+
+    // Payment routes
 
 });

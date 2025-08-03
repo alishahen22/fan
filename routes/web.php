@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -280,4 +281,9 @@ Route::middleware(['admin', 'printer'])->group(function () {
 
 Route::get('/sendNotification', function () {
     dd(sendNotification('f8Po2qOxpETJlNj3MiuQ6E:APA91bGZr1njZQ1mrwBpnSP2_l82Cdf7KBvn70IkeH8H9jaSmU2SOqYEk8RQoRO8Vs3yimSpwZc3qOL9jqO0EHqbTW_l4B6A4HEV77LydKtIowNyqApLSI0i5_OhH2YNT-zPZBDKjQgr', 'new notification', 'test message', 'general'));
+});
+
+Route::group(['prefix' => "payment"], function () {
+    Route::get('/callback', [PaymentController::class, 'callback']);
+    Route::get('/failed', [PaymentController::class, 'failed']);
 });
