@@ -17,7 +17,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Install PHP dependencies
-RUN RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
 # Laravel permissions
 RUN chown -R www-data:www-data /var/www \
