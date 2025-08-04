@@ -104,7 +104,7 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0">
-                                    <p class="text-muted mb-0">الاسم :</p>
+                                    <p class="text-muted mb-0">المكان المميز :</p>
                                 </div>
                                 <div class="flex-grow-1 ms-2">
                                     <h6 class="mb-0">{{ $order->address->title }}</h6>
@@ -118,22 +118,22 @@
                                     <h6 class="mb-0">{{ $order->address->address }}</h6>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center mb-3">
+                            {{-- <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0">
                                     <p class="text-muted mb-0">المدينه :</p>
                                 </div>
                                 <div class="flex-grow-1 ms-2">
                                     <h6 class="mb-0">{{ $order->address->city->title }}</h6>
                                 </div>
-                            </div>
-                            <div class="d-flex align-items-center mb-3">
+                            </div> --}}
+                            {{-- <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0">
                                     <p class="text-muted mb-0">المنطقة :</p>
                                 </div>
                                 <div class="flex-grow-1 ms-2">
                                     <h6 class="mb-0">{{ $order->address->area->title }}</h6>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0">
                                     <p class="text-muted mb-0">المكان على الخريطة :</p>

@@ -79,7 +79,7 @@ class HomeController extends Controller
      */
     public function articles(): JsonResponse
     {
-        $medical = Article::paginate(3);
+        $medical = Article::paginate(12);
         $result  = ArticleResources::collection($medical)->response()->getData(true);
         //    most sell service API
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
@@ -140,7 +140,7 @@ class HomeController extends Controller
 
     public function allOffers(): JsonResponse
     {
-        $data   = Offer::active()->orderBy('id', 'asc')->paginate(3);
+        $data   = Offer::active()->orderBy('id', 'asc')->paginate(12);
         $result = OfferResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
@@ -161,14 +161,14 @@ class HomeController extends Controller
 
     public function allCategories(): JsonResponse
     {
-        $data   = Category::orderBy('id', 'asc')->active()->paginate(3);
+        $data   = Category::orderBy('id', 'asc')->active()->paginate(12);
         $result = CategoriesResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
 
     public function categoriesByType($type): JsonResponse
     {
-        $data   = Category::where('type', $type)->orderBy('id', 'asc')->active()->paginate(3);
+        $data   = Category::where('type', $type)->orderBy('id', 'asc')->active()->paginate(12);
         $result = CategoriesResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
@@ -192,7 +192,7 @@ class HomeController extends Controller
     {
         $data = Product::whereHas('category', function ($q) use ($type) {
             $q->where('type', $type);
-        })->active()->paginate(3);
+        })->active()->paginate(12);
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }
@@ -218,7 +218,7 @@ class HomeController extends Controller
     // offersProducts
     public function offersProducts(): JsonResponse
     {
-         $data = Product::active()->where('discount', '>', 0)->paginate(3);
+         $data = Product::active()->where('discount', '>', 0)->paginate(12);
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }

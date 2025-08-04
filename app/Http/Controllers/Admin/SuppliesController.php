@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Supply;
 use Carbon\Carbon;
+use App\Models\Supply;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Imports\SupplyImport;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Validator;
 
 class SuppliesController extends Controller
 {
@@ -193,6 +195,23 @@ class SuppliesController extends Controller
             // });
 
         return $Query;
+    }
+
+
+     public function import()
+    {
+        return view('supplies.import');
+    }
+
+    public function importSupplies(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        Excel::import(new SupplyImport, $request->file('file'));
+
+        return redirect()->route('supplies.index')->with('success', __('تم استيراد المستلزمات بنجاح'));
     }
 
 }

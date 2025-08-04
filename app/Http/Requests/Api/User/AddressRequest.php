@@ -28,11 +28,11 @@ class AddressRequest extends FormRequest
     {
 
         return [
-            'title' => 'required|string|max:255',
-            'city_id' => 'required|exists:cities,id',
-            'area_id' => 'required|exists:areas,id,city_id,'.$this->city_id,
-            'street' => 'required|string|max:255',
-            'house_number' => 'required|string|max:255',
+            'title' => 'required|string|max:255', //مكان المميز
+          //  'city_id' => 'required|exists:cities,id',
+           // 'area_id' => 'required|exists:areas,id,city_id,'.$this->city_id,
+          //  'street' => 'required|string|max:255',
+          //  'house_number' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'lat' => 'required|string|max:255',
             'lng' => 'required|string|max:255',

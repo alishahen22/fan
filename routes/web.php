@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\ItemsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,12 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     Route::middleware('admin')->group(function () {
+
+        Route::get('/import-items', [ItemsController::class, 'import'])->name('import.items');
+        Route::post('/import-items', [ItemsController::class, 'importItems'])->name('import.items.post');
+
+        Route::get('/import-supplies', [\App\Http\Controllers\Admin\SuppliesController::class, 'import'])->name('import.supplies');
+        Route::post('/import-supplies', [\App\Http\Controllers\Admin\SuppliesController::class, 'importSupplies'])->name('import.supplies.post');
 
         Route::resource('/attributes', \App\Http\Controllers\Admin\AttributesController::class)->names('attributes')->except('show');
         Route::get('/attributes/data', [\App\Http\Controllers\Admin\AttributesController::class, 'getData'])->name('attributes.data');

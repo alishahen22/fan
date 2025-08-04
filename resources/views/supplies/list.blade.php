@@ -7,6 +7,7 @@
     @slot('getDataRoute', route('supplies.data'))
     @slot('createRoute', route('supplies.create'))
     @slot('deleteRoute', route('supplies.destroy', ':modelId'))
+    @slot('importRoute', route('import.supplies'))
     @slot('deleteMultiRoute', route('supplies.bulkDelete'))
     {{-- @slot('changeStatusMultiRoute', route('supplies.bulkChangeStatus')) --}}
 @endcomponent

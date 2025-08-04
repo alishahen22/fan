@@ -63,6 +63,11 @@
                                     <a href="{{ $createRoute }}" class="btn btn-success add-btn"
                                        id="create-btn"><i
                                             class="ri-add-line align-bottom me-1"></i> {{ $add_new }}</a>
+                                    @isset($importRoute)
+                                              <a href="{{ $importRoute }}" class="btn btn-success add-btn"
+                                       id="create-btn"><i
+                                            class="ri-add-line align-bottom me-1"></i>@lang('استيراد من excel')</a>
+                                    @endisset
                                     <button type="button" class="btn btn-soft-danger bulk-delete-btn"
                                             style="display: none;"><i
                                             class="ri-delete-bin-2-line align-bottom me-1"></i>

@@ -49,6 +49,14 @@ class AddressesController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = user_id();
+           //  'city_id' => 'required|exists:cities,id',
+           // 'area_id' => 'required|exists:areas,id,city_id,'.$this->city_id,
+          //  'street' => 'required|string|max:255',
+          //  'house_number' => 'required|string|max:255',
+          $data['city_id'] = 1;
+          $data['area_id'] = 1;
+          $data['street'] ='';
+          $data['house_number'] = '';
         $exists_address = Address::where('user_id', user_id())->first();
         if (!$exists_address) {
             $data['is_default'] = 1;
@@ -63,6 +71,10 @@ class AddressesController extends Controller
     public function update(AddressRequest $request)
     {
         $request = $request->validated();
+        $request['city_id'] = 1;
+        $request['area_id'] = 1;
+        $request['street'] = '';
+        $request['house_number'] = '';
         Address::where('id', $request['id'])->update($request);
         return msg(true, trans('lang.updated_s'), Response::HTTP_OK);
     }
