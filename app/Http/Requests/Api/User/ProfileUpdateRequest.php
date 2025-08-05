@@ -35,11 +35,11 @@ class ProfileUpdateRequest extends FormRequest
             'value_added_certificate_file' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:20480',
             'city_id' => 'required|exists:cities,id',
             'phone' => 'required|string|unique:users,phone,' . auth('user')->user()->id,
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'nullable|date',
             'gender' => 'required|in:male,female',
             'customer_type' => 'required|in:individual,business',
             'commercial_register' => 'required_if:customer_type,business|digits:10',
-         'commercial_register_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+           'commercial_register_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'tax_number_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
 
             'tax_number' => 'nullable|digits:15',

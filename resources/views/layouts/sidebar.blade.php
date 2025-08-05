@@ -1,3 +1,6 @@
+@php
+use App\Helpers\PermissionHelper;
+@endphp
 <!-- ========== App Menu ========== -->
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
@@ -49,12 +52,14 @@
                 {{--                @permission('users_list')--}}
                 @if(auth()->user()->type == 'admin')
 
+                @permission('users_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('users.*') ? 'active' : '' }}"
                        href="{{ route('users.index') }}">
                         <i class="ri-team-line"></i> <span>@lang('Users')</span>
                     </a>
                 </li>
+                @endpermission
                 {{--                @endpermission--}}
                 @php
                     $new_orders = \App\Models\Order::where('status','pending')->count();
@@ -62,6 +67,7 @@
                     $new_get_prices = \App\Models\GetPrice::where('seen_at',null)->count();
                 @endphp
 
+                @permission('orders_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
                         <i class="ri-shopping-cart-2-line"></i> <span>الطلبات</span>
@@ -71,7 +77,9 @@
                         @endif
                     </a>
                 </li>
+                @endpermission
 
+                @permission('direct_orders_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('direct_orders.*') ? 'active' : '' }}" href="{{ route('direct_orders.index') }}">
                         <i class="ri-shopping-cart-2-line"></i> <span>الطلبات المباشرة</span>
@@ -81,6 +89,9 @@
                         @endif
                     </a>
                 </li>
+                @endpermission
+
+                @permission('get_prices_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('get_prices.*') ? 'active' : '' }}" href="{{ route('get_prices.index') }}">
                         <i class="ri-shopping-cart-2-line"></i> <span>طلبات الحصول على تسعيره</span>
@@ -90,92 +101,119 @@
                         @endif
                     </a>
                 </li>
+                @endpermission
 
+                @permission('notifications_create')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('notifications.*') ? 'active' : '' }}"
                        href="{{ route('notifications.renderNotification') }}">
                         <i class="ri-notification-4-fill"></i> <span>@lang('Send Notifications')</span>
                     </a>
                 </li>
+                @endpermission
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-components">التجهيزات</span></li>
-                {{--                @permission('categories_list')--}}
+                @permission('categories_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('categories.*') ? 'active' : '' }}"
                        href="{{ route('categories.index') }}">
                         <i class="ri-list-check"></i> <span>@lang('Categories')</span>
                     </a>
                 </li>
+                @endpermission
 
+                @permission('attributes_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('attributes.*') ? 'active' : '' }}"
                        href="{{ route('attributes.index') }}">
                         <i class="ri-list-check"></i> <span>@lang('attributes')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('products_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('products.*') ? 'active' : '' }}"
                        href="{{ route('products.index') }}">
                         <i class="ri-list-check"></i> <span>@lang('Products')</span>
                     </a>
                 </li>
-                {{--                @endpermission--}}
+                @endpermission
 
-                {{--                @permission('sliders_list')--}}
+                @permission('sliders_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('sliders.*') ? 'active' : '' }}"
                        href="{{ route('sliders.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('Sliders')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('banners_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('banners.*') ? 'active' : '' }}"
                        href="{{ route('banners.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('banners')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('steps_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('steps.*') ? 'active' : '' }}"
                        href="{{ route('steps.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('steps')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('reviews_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('reviews.*') ? 'active' : '' }}"
                        href="{{ route('reviews.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('reviews')</span>
                     </a>
                 </li>
-                {{--                @endpermission--}}
-                {{--                @permission('sliders_list')--}}
+                @endpermission
+
+                @permission('offers_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('offers.*') ? 'active' : '' }}"
                        href="{{ route('offers.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('offers')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('splashes_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('splashes.*') ? 'active' : '' }}"
                        href="{{ route('splashes.index') }}">
                         <i class="ri-image-line"></i> <span>@lang('splashes')</span>
                     </a>
                 </li>
-                {{--                @endpermission--}}
-                {{--                @permission('sliders_list')--}}
+                @endpermission
+                @permission('cities_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('cities.*') ? 'active' : '' }}"
                        href="{{ route('cities.index') }}">
                         <i class=" ri-map-pin-line"></i> <span>@lang('cities')</span>
                     </a>
                 </li>
+                @endpermission
+
+                @permission('vouchers_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('vouchers.*') ? 'active' : '' }}"
                        href="{{ route('vouchers.index') }}">
                         <i class=" ri-price-tag-3-line"></i> <span>@lang('Vouchers')</span>
                     </a>
                 </li>
+                @endpermission
+
                 @php
                     $un_seen_messages = \App\Models\Contact::where('seen_at',null)->count();
-                    @endphp
+                @endphp
+                @permission('contacts_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('contacts.*') ? 'active' : '' }}"
                        href="{{ route('contacts.index') }}">
@@ -186,11 +224,11 @@
                             @endif
                     </a>
                 </li>
+                @endpermission
                 @endif
 
                 {{--  --}}
-                @if (auth()->user()->type == 'admin' || auth()->user()->type == 'printer')
-
+                @permission('items_list|supplies_list|print_services_list|quotations_list|packages_list')
             <li class="nav-item">
                 <a class="nav-link menu-link {{ Request::routeIs('items.*') || Request::routeIs('supplies.*') || Request::routeIs('print-services.*') || Request::routeIs('quotations.*') || Request::routeIs('invoices.*') || Request::routeIs('packages.*') || Request::routeIs('printSettings.*') ? 'active' : '' }}"
                 href="#sidebarStaticPages" data-bs-toggle="collapse" role="button"
@@ -201,52 +239,63 @@
                 <div class="menu-dropdown collapse {{ Request::routeIs('items.*') || Request::routeIs('supplies.*') || Request::routeIs('print-services.*') || Request::routeIs('quotations.*') || Request::routeIs('invoices.*') || Request::routeIs('packages.*') || Request::routeIs('printSettings.*') ? 'show' : '' }}"
                     id="sidebarStaticPages">
                     <ul class="nav nav-sm flex-column">
+                        @permission('items_list')
                         <li class="nav-item">
                             <a href="{{ route('items.index') }}" class="nav-link {{ Request::routeIs('items.*') ? 'active' : '' }}">
                                 @lang('تكويد المواد الخام')
                             </a>
                         </li>
+                        @endpermission
+                        @permission('supplies_list')
                         <li class="nav-item">
                             <a href="{{ route('supplies.index') }}" class="nav-link {{ Request::routeIs('supplies.*') ? 'active' : '' }}">
                                 @lang('تكويد المستلزمات')
                             </a>
                         </li>
+                        @endpermission
+                        @permission('print_services_list')
                         <li class="nav-item">
                             <a href="{{ route('print-services.index') }}" class="nav-link {{ Request::routeIs('print-services.*') ? 'active' : '' }}">
                                 @lang('تكويد اصناف')
                             </a>
                         </li>
+                        @endpermission
+                        @permission('quotations_list')
                         <li class="nav-item">
                             <a href="{{ route('quotations.index') }}" class="nav-link {{ Request::routeIs('quotations.*') ? 'active' : '' }}">
                                 @lang('عرض سعر')
                             </a>
                         </li>
+                        @endpermission
                         <li class="nav-item">
                             <a href="{{ route('invoices.index') }}" class="nav-link {{ Request::routeIs('invoices.*') ? 'active' : '' }}">
                                 @lang('الفاتورة')
                             </a>
                         </li>
+                        @permission('packages_list')
                         <li class="nav-item">
                             <a href="{{ route('packages.index') }}" class="nav-link {{ Request::routeIs('packages.*') ? 'active' : '' }}">
                                 @lang('الباقات')
                             </a>
                         </li>
+                        @endpermission
+                        @permission('print_settings_view')
                         <li class="nav-item">
                             <a href="{{ route('printSettings.edit') }}" class="nav-link {{ Request::routeIs('printSettings.*') ? 'active' : '' }}">
                                 @lang('إعدادات الطباعة')
                             </a>
                         </li>
+                        @endpermission
                     </ul>
                 </div>
             </li>
+                @endpermission
 
-                @endif
-
-                @if(auth()->user()->type == 'admin' )
-                {{--  --}}
-                {{--                @endpermission--}}
+                @permission('pages_edit|roles_list|admins_list|point_settings_list|settings_view')
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-components">الإعدادات</span></li>
-                {{--                @permission('pages_update')--}}
+                @endpermission
+
+                @permission('pages_edit')
                 @php
                     $pages = \App\Models\Page::all();
                 @endphp
@@ -270,38 +319,42 @@
                         </div>
                     </li> <!-- end Dashboard Menu -->
                 @endif
-                {{--                @endpermission--}}
-                {{--                @role('super_admin')--}}
-                {{--                    <li class="nav-item">--}}
-                {{--                        <a class="nav-link menu-link {{ Request::routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">--}}
-                {{--                            <i class="ri-lock-2-fill"></i> <span>@lang('Roles & Permissions')</span>--}}
-                {{--                        </a>--}}
-                {{--                    </li>--}}
+                @endpermission
 
+                @permission('roles_list')
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ Request::routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                        <i class="ri-lock-2-fill"></i> <span>@lang('Roles & Permissions')</span>
+                    </a>
+                </li>
+                @endpermission
 
+                @permission('admins_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('admins.*') ? 'active' : '' }}"
                        href="{{ route('admins.index') }}">
                         <i class="ri-user-2-fill"></i> <span>@lang('Admins')</span>
                     </a>
                 </li>
+                @endpermission
 
-                {{--                @endrole--}}
+                @permission('point_settings_list')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('point_settings.*') ? 'active' : '' }}"
                        href="{{ route('point_settings.create') }}">
                         <i class="ri-medal-fill"></i> <span>إعدادات النقاط</span>
                     </a>
                 </li>
-                {{--                @permission('settings_update')--}}
+                @endpermission
+
+                @permission('settings_view')
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ Request::routeIs('settings.*') ? 'active' : '' }}"
                        href="{{ route('settings.edit') }}">
                         <i class="ri-settings-2-fill"></i> <span>@lang('translation.settings')</span>
                         </a>
                     </li>
-{{--                @endpermission--}}
-                    @endif
+                @endpermission
 
             </ul>
             <br>

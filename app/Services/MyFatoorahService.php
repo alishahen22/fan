@@ -23,7 +23,8 @@ class MyFatoorahService
                 "CustomerName"       => $order->user->name,
                 "InvoiceValue"       => $order->total,
                 "DisplayCurrencyIso" => "SAR", // أو العملة المناسبة
-                "MobileCountryCode"  => "+966", // رمز الدولة
+                "MobileCountryCode"  => "+966",
+                "CountryCode"        => "SAU",
                 "CustomerEmail"      => $order->user->email ?? "test@example.com",
                 "CustomerMobile"     => $order->user->phone ?? "01000000000",
                 "CallBackUrl"        => url('/payment/callback'),

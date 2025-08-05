@@ -270,10 +270,6 @@ class AuthController extends Controller
     public function profileUpdate(ProfileUpdateRequest $request): JsonResponse
     {
         $data = $request->validated();
-        if (isset($data['value_added_certificate_file']) && is_file($data['value_added_certificate_file'])) {
-            $data['value_added_certificate_file'] = upload($data['value_added_certificate_file'], 'value_added_certificate_files');
-        }
-//        $data['country_code'] = str_replace('+', '', $data['country_code']);
 
         User::where('id', user_id())->update($data);
         $result = User::where('id', user_id())->first();;
