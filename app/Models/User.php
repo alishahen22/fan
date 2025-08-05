@@ -138,6 +138,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function getValueAddedCertificateFileAttribute($image)
     {
+
         if (!empty($image) && file_exists(public_path('storage/value_added_certificate_files/' . $image))) {
             return asset('storage') . '/value_added_certificate_files/' . $image;
         }

@@ -56,12 +56,12 @@ class AdminsController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'type' =>  $request->type
+          //  'type' =>  $request->type
 
         ]);
 
         // assign role
-//        $admin->addRole($request->role_id);
+    $admin->addRole($request->role);
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();

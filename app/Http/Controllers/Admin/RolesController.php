@@ -76,6 +76,7 @@ class RolesController extends Controller
         $permissions = Permission::all()->groupBy('model')->map(function ($item) {
             return $item;
         });
+        // dd($role->permissions()->get()->pluck('id')->toArray());
         return view('roles.edit',[
             'role' => $role,
             'permissions' => $permissions,

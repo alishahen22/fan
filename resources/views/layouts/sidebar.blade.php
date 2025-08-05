@@ -50,7 +50,6 @@ use App\Helpers\PermissionHelper;
 
                 {{--                @endpermission--}}
                 {{--                @permission('users_list')--}}
-                @if(auth()->user()->type == 'admin')
 
                 @permission('users_list')
                 <li class="nav-item">
@@ -225,7 +224,6 @@ use App\Helpers\PermissionHelper;
                     </a>
                 </li>
                 @endpermission
-                @endif
 
                 {{--  --}}
                 @permission('items_list|supplies_list|print_services_list|quotations_list|packages_list')
@@ -266,12 +264,13 @@ use App\Helpers\PermissionHelper;
                                 @lang('عرض سعر')
                             </a>
                         </li>
-                        @endpermission
                         <li class="nav-item">
                             <a href="{{ route('invoices.index') }}" class="nav-link {{ Request::routeIs('invoices.*') ? 'active' : '' }}">
                                 @lang('الفاتورة')
                             </a>
                         </li>
+                        @endpermission
+
                         @permission('packages_list')
                         <li class="nav-item">
                             <a href="{{ route('packages.index') }}" class="nav-link {{ Request::routeIs('packages.*') ? 'active' : '' }}">

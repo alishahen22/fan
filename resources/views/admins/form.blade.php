@@ -66,12 +66,23 @@
 
                         <div class="mb-3">
                             <label for="type" class="form-label">@lang('translation.Select Type')</label>
-                            <select id="type" class="form-select" name="type" required>
+                            {{-- <select id="type" class="form-select" name="type" required>
                                 <option value="" selected disabled>@lang('translation.Select Type')</option>
                                 <option value="admin" {{ isset($admin) && $admin->type == 'admin' ? 'selected' : '' }}>@lang('مسؤول عام')</option>
                                 <option value="printer" {{ isset($admin) && $admin->type == 'printer' ? 'selected' : '' }}>@lang('مسؤول الطباعة')</option>
+                            </select> --}}
+                            <select id="type" class="js-example-basic-single form-select" name="role" required>
+                                <option value="" selected disabled>@lang('translation.Select Role')</option>
+                                @php
+                                    $roles = \App\Models\Role::get();
+                                @endphp
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->id }}" {{ isset($admin) && $admin->roles()->first() && optional($admin->roles())->first()->id == $role->id  ? 'selected' : '' }}>{{ $role->{'display_name_'.app()->getLocale()} }}</option>
+                                @endforeach
                             </select>
-
+                            <div class="invalid-feedback">
+                                @lang('translation.Please Choose a value')
+                            </div>
                     </div>
                     <!-- end card body -->
                 </div>

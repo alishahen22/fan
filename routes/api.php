@@ -40,7 +40,7 @@ Route::prefix('client')->group(function () {
             Route::post('/sign_up', [AuthController::class, 'signUp']);
             Route::post('/sign_up/verify', [AuthController::class, 'verifySignUp']);
 
-            Route::post('/forget_password', [AuthController::class, 'forgetPassword']);
+            Route::post('/forget_password', [AuthCont8roller::class, 'forgetPassword']);
             Route::post('/forget_password/verify', [AuthController::class, 'verifyForgetPassword']);
             Route::post('/forget_password/update_password', [AuthController::class, 'ForgetPasswordUpdatePassword']);
         });

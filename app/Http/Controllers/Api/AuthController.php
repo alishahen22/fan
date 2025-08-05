@@ -270,6 +270,17 @@ class AuthController extends Controller
     public function profileUpdate(ProfileUpdateRequest $request): JsonResponse
     {
         $data = $request->validated();
+       $uploadFields = [
+        'value_added_certificate_file' => 'value_added_certificate_files',
+        'commercial_register_image'    => 'commercial_register_images',
+        'tax_number_image'             => 'tax_number_images',
+    ];
+
+    foreach ($uploadFields as $field => $folder) {
+        if (isset($data[$field])) {
+            $data[$field] = upload($data[$field], $folder);
+        }
+    }
 
         User::where('id', user_id())->update($data);
         $result = User::where('id', user_id())->first();;

@@ -987,8 +987,8 @@ class PermissionsSeeder extends Seeder
         ];
         //delete existing permissions
 DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-Permission::truncate();
-DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+    Permission::truncate();
+    DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
 foreach ($permissions as $permission) {
             Permission::firstOrCreate(
