@@ -152,7 +152,6 @@ class OrdersController extends Controller
      */
     public function place(OrderPlaceRequest $request): JsonResponse
     {
-
         $request = $request->validated();
         $userId = user_id();
         $user = User::whereId($userId)->first();
@@ -258,28 +257,31 @@ class OrdersController extends Controller
                 ];
 
                 $payment = app(MyFatoorahService::class)->createInvoice($order);
-                
+
                 $order->invoice_id = $payment['InvoiceId'] ?? null;
+                $order->success_url = $request['success_url'];
+                $order->failure_url = $request['failure_url'];
                 $order->save();
                 $paymentLink = $payment['PaymentURL'];
+
                 $order->paymentLink =  $paymentLink; // رابط الدفع
-                
+
             }
-            
+
 
 
 
             if ($request['payment_method'] == 'cash') {
-                
+
                 $order_money = settings('order_money');
                 $order_points = settings('order_points');
-    
+
                 $avg_reward = $order->total / $order_money;
                 $points = $avg_reward * $order_points;
                 $user = User::whereId($userId)->first();
                 $user->points += $points;
                 $user->save();
-    
+
                 //save user points transactions ...
                 $user_point_transactions['user_id'] = user_id();
                 $user_point_transactions['order_id'] = $order->id;
@@ -287,14 +289,14 @@ class OrdersController extends Controller
                 $user_point_transactions['type'] = 'add';
                 $user_point_transactions['money'] = $order->total;
                 UserPoint::create($user_point_transactions);
-    
+
     //            remove all items in cart after order
                 Cart::where('user_id', $userId)->delete();
                 if ($voucher_added) {
                     $voucher_user_data['user_id'] = user_id();
                     $voucher_user_data['voucher_id'] = $voucher->id;
                     VoucherUser::create($voucher_user_data);
-    
+
                     $voucher->voucher_used_count = $voucher->voucher_used_count + 1;
                     $voucher->save();
                 }

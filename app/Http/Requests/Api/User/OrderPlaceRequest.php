@@ -33,6 +33,8 @@ class OrderPlaceRequest extends FormRequest
             'voucher_code' => 'nullable|string|max:255',
             'payment_method' => ['required', Rule::in(Order::PAYMENT_METHOD)],
             'notes' => ['nullable','string','max:2000'],
+            'success_url' => 'required_if:payment_method,credit',
+            'failure_url' => 'required_if:payment_method,credit',
         ];
     }
 

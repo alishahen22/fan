@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Http;
 class PaymentController extends Controller
 {
     private  $myFatoorahService;
-   
+
     //contract
         public function __construct(MyFatoorahService $MyFatoorahService)
         {
@@ -44,11 +44,7 @@ class PaymentController extends Controller
             return $this->handleFailure($data['Data']);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Unknown failure state.',
-            'data' => $data,
-        ]);
+        return $this->handleFailure($data['Data']);
     }
 
     protected function handleSuccess($data)
@@ -96,11 +92,7 @@ class PaymentController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment processed successfully.',
-            'data' => $data,
-        ]);
+        return redirect()->to($order->success_url);
     }
 
     protected function handleFailure($data)
@@ -113,10 +105,7 @@ class PaymentController extends Controller
             $order->delete();
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Payment failed or was not successful.',
-            'data' => $data,
-        ]);
+        $failureUrl = $order->failure_url;
+        return redirect()->to($failureUrl);
     }
 }

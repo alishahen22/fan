@@ -28,6 +28,8 @@ class Order extends Model
         'completed_at',
         'notes',
         'system_notes',
+        'success_url',
+        'failure_url',
     ];
 
     use HasFactory;
