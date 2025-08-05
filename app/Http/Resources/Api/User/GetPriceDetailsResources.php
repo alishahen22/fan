@@ -21,6 +21,7 @@ class GetPriceDetailsResources extends JsonResource
                 'subject' => $this->subject,
                 'message' => $this->message,
                 'reply' => $this->reply,
+                'file' => $this->file,
                 'seen_at' => $this->seen_at,
                 'created_at' => $this->created_at->translatedformat('d M Y g:i a'),
                 'files' =>  $this->files ,

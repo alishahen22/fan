@@ -1,48 +1,43 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\NotificationActionEnum;
-
-use App\Enums\OrderStatusEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\DirectOrder;
 use App\Models\GetPrice;
-use App\Models\Notification;
-use App\Models\Order;
-use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class GetPriceOrdersController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware('permission:get_prices_list')->only(['index', 'getData']);
+        $this->middleware('permission:get_prices_view')->only(['show']);
+        $this->middleware('permission:get_prices_edit')->only(['reply']);
+        $this->middleware('permission:get_prices_delete')->only(['destroy', 'bulkDelete']);
+    }
 
     public function index()
     {
         return view('get_prices.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
     public function show($id)
     {
 
-        $order = GetPrice::findOrFail($id);
+        $order          = GetPrice::findOrFail($id);
         $order->seen_at = Carbon::now();
         $order->save();
         return view('get_prices.edit', [
             'title' => 'تفاصيل طلب الحصول على التسعيرة',
-            'data' => $order
+            'data'  => $order,
         ]);
     }
-
 
     /**
      * @param Request $request
@@ -84,7 +79,7 @@ class GetPriceOrdersController extends Controller
                 $user = $row->user->name ? ($row->user->name) : $row->user->phone;
                 return '<a href="' . route('users.show', $row->user_id) . '">' . $user . '</a>';
             })
-            ->rawColumns(['select', 'action','user_name'])
+            ->rawColumns(['select', 'action', 'user_name'])
             ->make();
     }
 
@@ -123,21 +118,25 @@ class GetPriceOrdersController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'reply' => [
-                'required'
+                'required',
             ],
+            'file'  => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:2048',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
+
         $order = GetPrice::findOrFail($id);
+        if ($request->hasFile('file')) {
+            $file        = upload($request->file('file'), 'get_price_files');
+            $order->file = $file;
+        }
         $order->reply = $request->reply;
         $order->save();
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
-
-
 
     public function columns()
     {
@@ -160,7 +159,6 @@ class GetPriceOrdersController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -168,12 +166,12 @@ class GetPriceOrdersController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:get_prices,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator);
             }
             GetPrice::whereIn('id', $ids)->delete();

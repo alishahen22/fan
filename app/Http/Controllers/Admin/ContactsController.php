@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -12,16 +11,23 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ContactsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:contacts_list')->only(['index', 'getData']);
+        $this->middleware('permission:contacts_view')->only(['show']);
+        $this->middleware('permission:contacts_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index()
     {
         return view('contacts.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
     public function edit($id)
     {
-        $data = Contact::findOrFail($id);
+        $data          = Contact::findOrFail($id);
         $data->seen_at = Carbon::now();
         $data->save();
         return view('contacts.edit', compact('data'));
@@ -37,7 +43,6 @@ class ContactsController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -45,12 +50,12 @@ class ContactsController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:contacts,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
             Contact::whereIn('id', $ids)->delete();
@@ -112,7 +117,7 @@ class ContactsController extends Controller
      */
     public function filter(Request $request)
     {
-        $contactsQuery = Contact::query()->orderBy('id','desc')
+        $contactsQuery = Contact::query()->orderBy('id', 'desc')
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
                 $searchKey = $request->search_key;
                 return $query->where(function ($query) use ($searchKey) {
@@ -133,7 +138,6 @@ class ContactsController extends Controller
 
         return $contactsQuery;
     }
-
 
     public function columns(): array
     {

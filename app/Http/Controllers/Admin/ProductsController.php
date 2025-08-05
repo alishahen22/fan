@@ -1,29 +1,28 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\Cart;
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\Attribute;
-use App\Models\ProductImage;
-use Illuminate\Http\Request;
-use App\Models\ProductAttribute;
-use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use Yajra\DataTables\Facades\DataTables;
+use App\Models\Attribute;
+use App\Models\Cart;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductAttribute;
+use App\Models\ProductImage;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class ProductsController extends Controller
 {
     public function __construct()
     {
-//        $this->middleware('permission:products_list', ['only' => ['index','getData']]);
-//        $this->middleware('permission:products_create', ['only' => ['create','store']]);
-//        $this->middleware('permission:products_update', ['only' => ['edit','update']]);
-//        $this->middleware('permission:products_delete', ['only' => ['destroy','bulkDelete']]);
-//        $this->middleware('permission:products_change_status', ['only' => ['changeStatus']]);
+        $this->middleware('permission:products_list')->only(['index', 'getData']);
+        $this->middleware('permission:products_create')->only(['create', 'store']);
+        $this->middleware('permission:products_edit')->only(['edit', 'update', 'changeStatus', 'bulkChangeStatus', 'UploadGallery', 'removeGallery']);
+        $this->middleware('permission:products_delete')->only(['destroy', 'bulkDelete']);
     }
 
     public function index()
@@ -49,7 +48,7 @@ class ProductsController extends Controller
             'desc_ar'              => 'nullable|string|max:3000',
             'desc_en'              => 'nullable|string|max:3000',
             'category_id'          => 'required|exists:categories,id',
-        //    'price'                => 'required|numeric|min:0',
+            //    'price'                => 'required|numeric|min:0',
             'custom_quantity_from' => 'required|numeric|min:0',
             'custom_quantity_to'   => 'required|numeric|min:0|gte:custom_quantity_from',
             'discount'             => 'nullable|numeric|min:0|max:100',
@@ -183,7 +182,7 @@ class ProductsController extends Controller
         ) {
             // حذف الكميات القديمة
             //get the existing quantities
-           $product->quantities()->delete();
+            $product->quantities()->delete();
 
             $quantities = $request['quantities'];
             $prices     = $request['prices'];
@@ -202,7 +201,6 @@ class ProductsController extends Controller
         }
 
         Cart::where('product_id', $product->id)->delete();
-
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();

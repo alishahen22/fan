@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\NotificationActionEnum;
-
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Http\Controllers\Controller;
@@ -20,12 +18,17 @@ use Yajra\DataTables\Facades\DataTables;
 
 class OrdersController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware('permission:orders_list')->only(['index', 'getData']);
+        $this->middleware('permission:orders_view')->only(['show', 'invoice']);
+        $this->middleware('permission:orders_edit')->only(['changeStatus', 'changeSystemNotes']);
+    }
 
     public function index()
     {
         return view('orders.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -34,10 +37,9 @@ class OrdersController extends Controller
         $order = Order::findOrFail($id);
         return view('orders.show', [
             'title' => 'تفاصيل الطلب',
-            'order' => $order
+            'order' => $order,
         ]);
     }
-
 
     /**
      * @param Request $request
@@ -158,15 +160,15 @@ class OrdersController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => [
                 'required',
-                Rule::in(Order::STATUS)
+                Rule::in(Order::STATUS),
             ],
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
-        $UserPlan = Order::findOrFail($id);
+        $UserPlan         = Order::findOrFail($id);
         $UserPlan->status = $request->status;
         $UserPlan->save();
 
@@ -177,18 +179,18 @@ class OrdersController extends Controller
 
             $subject_ar = 'تم تغيير حالة الطلب رقم ' . $UserPlan->id;
             $message_ar = 'تم تغيير حالة الطلب رقم ' . $UserPlan->id . 'الي ' . __($UserPlan->status);
-            $ids = [$UserPlan->user_id];
+            $ids        = [$UserPlan->user_id];
             Notification::create([
-                'title_ar' => $subject_ar,
-                'title_en' => $subject,
-                'desc_en' => $message,
-                'desc_ar' => $message_ar,
-                'type' => 'reservation',
-                'action' => NotificationActionEnum::Change_status->value,
-                'user_type' => 'custom',
-                'target_id' => $UserPlan->id,
+                'title_ar'    => $subject_ar,
+                'title_en'    => $subject,
+                'desc_en'     => $message,
+                'desc_ar'     => $message_ar,
+                'type'        => 'reservation',
+                'action'      => NotificationActionEnum::Change_status->value,
+                'user_type'   => 'custom',
+                'target_id'   => $UserPlan->id,
                 'target_type' => Order::class,
-                'users' => implode(',', $ids),
+                'users'       => implode(',', $ids),
             ]);
 
         } catch (\Exception $e) {
@@ -203,14 +205,14 @@ class OrdersController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'system_notes' => [
-                'required'
+                'required',
             ],
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
-        $order = Order::findOrFail($id);
+        $order               = Order::findOrFail($id);
         $order->system_notes = $request->system_notes;
         $order->save();
         session()->flash('success', __('Operation Done Successfully'));
@@ -223,12 +225,11 @@ class OrdersController extends Controller
         $settings = Setting::all()->pluck('value', 'key')->toArray();
 
         return view('orders.invoice', [
-            'title' => __('UserPlan Invoice'),
+            'title'    => __('UserPlan Invoice'),
             'UserPlan' => $UserPlan,
             'settings' => $settings,
         ]);
     }
-
 
     public function columns()
     {

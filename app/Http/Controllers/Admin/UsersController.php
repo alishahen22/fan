@@ -1,35 +1,35 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Admin;
-use App\Models\Order;
-use App\Models\Quotation;
-use Illuminate\Http\Request;
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Yajra\DataTables\Facades\DataTables;
+use App\Models\Order;
+use App\Models\Quotation;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Yajra\DataTables\Facades\DataTables;
 
 class UsersController extends Controller
 {
     public function __construct()
     {
-//        $this->middleware('permission:users_list', ['only' => ['index','getData']]);
-//        $this->middleware('permission:users_change_status', ['only' => ['changeStatus']]);
+        $this->middleware('permission:users_list')->only(['index', 'getData']);
+        $this->middleware('permission:users_create')->only(['create', 'store']);
+        $this->middleware('permission:users_edit')->only(['edit', 'update', 'changeStatus']);
+        $this->middleware('permission:users_delete')->only(['destroy']);
+        $this->middleware('permission:users_view')->only(['show']);
     }
 
     public function index()
     {
 
         return view('users.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -45,17 +45,17 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email',
-            'city_id' => 'required|exists:cities,id',
-            'phone' => 'required|min:7|unique:users,phone',
-            'discount' => 'required|numeric|min:0|max:100',
-            'customer_type' => 'required|in:individual,business',
-            'commercial_register' => 'required_if:customer_type,business|digits:10',
+            'name'                      => 'required|min:3',
+            'email'                     => 'required|email|unique:users,email',
+            'city_id'                   => 'required|exists:cities,id',
+            'phone'                     => 'required|min:7|unique:users,phone',
+            'discount'                  => 'required|numeric|min:0|max:100',
+            'customer_type'             => 'required|in:individual,business',
+            'commercial_register'       => 'required_if:customer_type,business|digits:10',
             'commercial_register_image' => 'required_if:customer_type,business|image|mimes:jpg,jpeg,png|max:2048',
-            'tax_number' => 'nullable|digits:15',
-            'tax_number_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'tax_number'                => 'nullable|digits:15',
+            'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'password'                  => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {
@@ -91,17 +91,17 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'phone' => 'required|min:7|unique:users,phone,' . $id,
-            'city_id' => 'required|exists:cities,id',
-            'discount' => 'required|numeric|min:0|max:100',
-            'customer_type' => 'required|in:individual,business',
-            'commercial_register' => 'required_if:customer_type,business|digits:10',
+            'name'                      => 'required|min:3',
+            'email'                     => 'required|email|unique:users,email,' . $id,
+            'phone'                     => 'required|min:7|unique:users,phone,' . $id,
+            'city_id'                   => 'required|exists:cities,id',
+            'discount'                  => 'required|numeric|min:0|max:100',
+            'customer_type'             => 'required|in:individual,business',
+            'commercial_register'       => 'required_if:customer_type,business|digits:10',
             'commercial_register_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'tax_number' => 'nullable|digits:15',
-            'tax_number_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password' => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'tax_number'                => 'nullable|digits:15',
+            'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'password'                  => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {
@@ -119,7 +119,7 @@ class UsersController extends Controller
             $data['tax_number_image'] = $request->file('tax_number_image')->store('tax_numbers', 'public');
         }
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = bcrypt($data['password']);
         } else {
             unset($data['password']);
@@ -133,29 +133,29 @@ class UsersController extends Controller
 
     public function show($id)
     {
-        $data = User::whereId($id)->first();
+        $data    = User::whereId($id)->first();
         $columns = $this->orders_columns();
         //get user invoices
         $yearTotal = Quotation::where('user_id', $id)
-        ->where('type', 'invoice')
-        ->whereYear('date', now()->year)
-        ->sum('total');
+            ->where('type', 'invoice')
+            ->whereYear('date', now()->year)
+            ->sum('total');
 
-    $monthTotal = Quotation::where('user_id', $id)
-        ->where('type', 'invoice')
-        ->whereYear('date', now()->year)
-        ->whereMonth('date', now()->month)
-        ->sum('total');
+        $monthTotal = Quotation::where('user_id', $id)
+            ->where('type', 'invoice')
+            ->whereYear('date', now()->year)
+            ->whereMonth('date', now()->month)
+            ->sum('total');
 
         $lifetimeTotal = Quotation::where('user_id', $id)
             ->where('type', 'invoice')
             ->sum('total');
 
-            $date   = [
-                'yearTotal' => $yearTotal,
-                'monthTotal' => $monthTotal,
-                'lifetimeTotal' => $lifetimeTotal,
-            ];
+        $date = [
+            'yearTotal'     => $yearTotal,
+            'monthTotal'    => $monthTotal,
+            'lifetimeTotal' => $lifetimeTotal,
+        ];
         return view('users.show', compact('data', 'columns', 'date'));
     }
 
@@ -188,8 +188,8 @@ class UsersController extends Controller
             })
             ->addColumn('action', function ($row) {
                 $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
-                        <a href="'.route('users.edit',$row->id).'" class="text-primary d-inline-block edit-item-btn">
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
+                        <a href="' . route('users.edit', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-pencil-fill fs-16"></i>
                         </a>
                     </li>
@@ -368,15 +368,15 @@ class UsersController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:users,id',
+            'id'        => 'required|exists:users,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $user = User::findOrFail($request->id);
+        $user            = User::findOrFail($request->id);
         $user->is_active = $request->is_active;
         $user->save();
         return response()->json(['success' => __('Operation Done Successfully')]);

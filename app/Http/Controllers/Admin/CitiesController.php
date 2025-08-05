@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -13,10 +12,18 @@ use Yajra\DataTables\Facades\DataTables;
 
 class CitiesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:cities_list')->only(['index', 'getData']);
+        $this->middleware('permission:cities_create')->only(['create', 'store']);
+        $this->middleware('permission:cities_edit')->only(['edit', 'update', 'changeStatus', 'bulkChangeStatus']);
+        $this->middleware('permission:cities_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index()
     {
         return view('cities.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -32,13 +39,13 @@ class CitiesController extends Controller
             'title_en' => 'required|min:3',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         City::create([
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -49,7 +56,7 @@ class CitiesController extends Controller
     public function edit($id)
     {
         $category = City::findOrFail($id);
-        return view('cities.edit',compact('category'));
+        return view('cities.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
@@ -59,15 +66,15 @@ class CitiesController extends Controller
             'title_en' => 'required|min:3',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $category = City::findOrFail($id);
 
         $category->update([
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -80,11 +87,10 @@ class CitiesController extends Controller
         try {
             $category = City::findOrFail($id);
             $category->delete();
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
-
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -93,17 +99,17 @@ class CitiesController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:cities,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            City::whereIn('id',$ids)->delete();
+            City::whereIn('id', $ids)->delete();
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -114,19 +120,19 @@ class CitiesController extends Controller
     public function bulkChangeStatus(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:cities,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            City::whereIn('id',$ids)->update([
-                'is_active' => $request->is_active ?? 0
+            City::whereIn('id', $ids)->update([
+                'is_active' => $request->is_active ?? 0,
             ]);
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -142,7 +148,7 @@ class CitiesController extends Controller
                 return '
                     <th scope="row">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="'.$row->id.'">
+                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="' . $row->id . '">
                         </div>
                     </th>
                 ';
@@ -158,15 +164,15 @@ class CitiesController extends Controller
             })
             ->addColumn('action', function ($row) {
                 $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
-                        <a href="'.route('cities.edit',$row->id).'" class="text-primary d-inline-block edit-item-btn">
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
+                        <a href="' . route('cities.edit', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-pencil-fill fs-16"></i>
                         </a>
                     </li>
                 ';
                 $actionButtons .= '
-                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Remove').'">
-                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="'.$row->id.'" href="#deleteRecordModal">
+                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Remove') . '">
+                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal">
                                 <i class="ri-delete-bin-5-fill fs-16"></i>
                             </a>
                         </li>
@@ -176,27 +182,27 @@ class CitiesController extends Controller
                         ' . $actionButtons . '
                     </ul>
                 ';
-            }) ->addColumn('areas', function ($row) {
-                $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
+            })->addColumn('areas', function ($row) {
+            $actionButtons = '
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
                         <a href="' . route('areas.index', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-eye-fill fs-16"></i>
-                            '.$row->areas->count().'
+                            ' . $row->areas->count() . '
                         </a>
                     </li>
                 ';
 
-                return '
+            return '
                     <ul class="list-inline hstack gap-2 mb-0">
                         ' . $actionButtons . '
                     </ul>
                 ';
-            })
+        })
 
             ->editColumn('created_at', function ($row) {
                 return Carbon::parse($row->created_at)->toDateString();
             })
-            ->rawColumns(['select','image', 'action','areas'])
+            ->rawColumns(['select', 'image', 'action', 'areas'])
             ->make();
     }
 
@@ -215,14 +221,14 @@ class CitiesController extends Controller
                 });
             })
             ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
-                $query->where('created_at','>=',$request->from_date);
+                $query->where('created_at', '>=', $request->from_date);
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
-                $query->where('created_at','<=',$request->to_date);
+                $query->where('created_at', '<=', $request->to_date);
             })
             ->when($request->has('status') && $request->filled('status'), function ($query) use ($request) {
-                if (in_array($request->status,[0,1])) {
-                    $query->where('is_active',$request->status);
+                if (in_array($request->status, [0, 1])) {
+                    $query->where('is_active', $request->status);
                 }
             });
 
@@ -232,15 +238,15 @@ class CitiesController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:cities,id',
+            'id'        => 'required|exists:cities,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $category = City::findOrFail($request->id);
+        $category            = City::findOrFail($request->id);
         $category->is_active = $request->is_active;
         $category->save();
         return response()->json(['success' => __('Operation Done Successfully')]);
@@ -251,7 +257,7 @@ class CitiesController extends Controller
         return [
             ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false],
             ['data' => 'title_' . App::getLocale(), 'name' => 'title_' . App::getLocale(), 'label' => __('Title')],
-            ['data' => 'areas' , 'name' => 'areas' , 'label' => 'المناطق'],
+            ['data' => 'areas', 'name' => 'areas', 'label' => 'المناطق'],
             ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
         ];
     }

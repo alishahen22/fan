@@ -64,19 +64,44 @@
                     <h5 class="card-title mb-0"><i
                             class="ri-user-2-line align-bottom me-1 text-muted"></i>رد الادارة</h5>
                 </div>
+                @if(!$data->reply)
                 <div class="card-body">
-                    <form method="post" action="{{ route('get_prices.reply', $data->id) }}">
+                    <form method="post" action="{{ route('get_prices.reply', $data->id) }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <div class="mb-3">
                                 <textarea  required class="form-control" rows="5" name="reply" >{{$data->reply}}</textarea>
                             </div>
+                            <div class="mb-3">
+                                <label for="file" class="form-label">إرفاق ملف</label>
+                                <input type="file" name="file" class="form-control" id="file">
+                                @error('file')
+                                <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             <div class="text-end mb-3">
                                 <button type="submit" class="btn btn-success w-sm">حفظ</button>
                             </div>
                         </div>
                     </form>
                 </div>
+
+                @else
+                    <div class="card-body">
+                        <p class="text-muted">{{$data->reply}}</p>
+                        @if($data->file)
+                            <div class="mb-3">
+                                <a href="{{$data->file}}" target="_blank"  >
+                                    <div class="avatar-sm flex-shrink-0" >
+                                        <span class="avatar-title bg-light rounded fs-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text text-primary icon-dual-primary"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        </span>
+                                    </div>
+                                    {{--                    <span>{{basename($design->file)}}</span>--}}
+                                </a>
+                            </div>
+
+                            @endif
+                @endif
             </div><!--end card-->
             <!-- end card -->
         </div>

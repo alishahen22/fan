@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -13,11 +12,19 @@ use Yajra\DataTables\Facades\DataTables;
 
 class AreaController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:areas_list')->only(['index', 'getData']);
+        $this->middleware('permission:areas_create')->only(['create', 'store']);
+        $this->middleware('permission:areas_edit')->only(['edit', 'update', 'changeStatus', 'bulkChangeStatus']);
+        $this->middleware('permission:areas_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index($id)
     {
         return view('areas.list', [
-            'id' => $id,
-            'columns' => $this->columns()
+            'id'      => $id,
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -31,18 +38,18 @@ class AreaController extends Controller
         $validator = Validator::make($request->all(), [
             'title_ar' => 'required|min:3',
             'title_en' => 'required|min:3',
-            'cost' => 'required|numeric|min:0',
+            'cost'     => 'required|numeric|min:0',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         Area::create([
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
-            'cost' => $request->cost,
-            'city_id' => $id,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
+            'cost'      => $request->cost,
+            'city_id'   => $id,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -53,7 +60,7 @@ class AreaController extends Controller
     public function edit($id)
     {
         $category = Area::findOrFail($id);
-        $id = $category->city_id;
+        $id       = $category->city_id;
         return view('areas.edit', compact('category', 'id'));
     }
 
@@ -62,19 +69,19 @@ class AreaController extends Controller
         $validator = Validator::make($request->all(), [
             'title_ar' => 'required|min:3',
             'title_en' => 'required|min:3',
-            'cost' => 'required|numeric|min:0',
+            'cost'     => 'required|numeric|min:0',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $category = Area::findOrFail($id);
 
         $category->update([
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
-            'cost' => $request->cost,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
+            'cost'      => $request->cost,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -92,7 +99,6 @@ class AreaController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -100,12 +106,12 @@ class AreaController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:areas,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
             Area::whereIn('id', $ids)->delete();
@@ -121,16 +127,16 @@ class AreaController extends Controller
     public function bulkChangeStatus(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:areas,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
             Area::whereIn('id', $ids)->update([
-                'is_active' => $request->is_active ?? 0
+                'is_active' => $request->is_active ?? 0,
             ]);
 
         } catch (\Exception $e) {
@@ -224,15 +230,15 @@ class AreaController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:areas,id',
+            'id'        => 'required|exists:areas,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $category = Area::findOrFail($request->id);
+        $category            = Area::findOrFail($request->id);
         $category->is_active = $request->is_active;
         $category->save();
         return response()->json(['success' => __('Operation Done Successfully')]);

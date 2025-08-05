@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -13,10 +12,18 @@ use Yajra\DataTables\Facades\DataTables;
 
 class VouchersController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:vouchers_list')->only(['index', 'getData']);
+        $this->middleware('permission:vouchers_create')->only(['create', 'store']);
+        $this->middleware('permission:vouchers_edit')->only(['edit', 'update', 'changeStatus', 'changeFirstOrder']);
+        $this->middleware('permission:vouchers_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index()
     {
         return view('vouchers.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -29,38 +36,38 @@ class VouchersController extends Controller
     {
         $validator = Validator::make($request->all(), [
 //            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title_ar' => 'required|min:3',
-            'title_en' => 'required|min:3',
+            'title_ar'        => 'required|min:3',
+            'title_en'        => 'required|min:3',
 //            'desc_ar' => 'nullable|max:3000',
 //            'desc_en' => 'nullable|max:3000',
-            'code' => 'required|min:3|unique:vouchers',
-            'start_date' => 'required|date_format:Y-m-d|after_or_equal:today',
-            'expire_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
-            'user_use_count' => 'required|integer|min:1',
-            'use_count' => 'required|integer|min:1',
-            'percent' => 'required|integer|min:0.1',
+            'code'            => 'required|min:3|unique:vouchers',
+            'start_date'      => 'required|date_format:Y-m-d|after_or_equal:today',
+            'expire_date'     => 'required|date_format:Y-m-d|after_or_equal:start_date',
+            'user_use_count'  => 'required|integer|min:1',
+            'use_count'       => 'required|integer|min:1',
+            'percent'         => 'required|integer|min:0.1',
             'min_order_price' => 'required|numeric|min:0',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         Voucher::create([
 //            'image' => $request->image,
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
+            'title_ar'        => $request->title_ar,
+            'title_en'        => $request->title_en,
 //            'desc_ar' => $request->desc_ar,
 //            'desc_en' => $request->desc_en,
-            'code' => $request->code,
-            'start_date' => $request->start_date,
-            'expire_date' => $request->expire_date,
-            'user_use_count' => $request->user_use_count,
-            'use_count' => $request->use_count,
+            'code'            => $request->code,
+            'start_date'      => $request->start_date,
+            'expire_date'     => $request->expire_date,
+            'user_use_count'  => $request->user_use_count,
+            'use_count'       => $request->use_count,
             'min_order_price' => $request->min_order_price,
-            'percent' => $request->percent,
+            'percent'         => $request->percent,
 //            'for_first_order' => $request->has('for_first_order'),
-            'is_active' => $request->has('is_active'),
+            'is_active'       => $request->has('is_active'),
         ]);
 
         session()->flash('success', __('Operation Done Successfully'));
@@ -76,22 +83,22 @@ class VouchersController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'title_ar' => 'required|min:3',
-            'title_en' => 'required|min:3',
+            'title_ar'        => 'required|min:3',
+            'title_en'        => 'required|min:3',
 //            'desc_ar' => 'nullable|max:3000',
 //            'desc_en' => 'nullable|max:3000',
 //            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'code' => ['required', 'min:3', Rule::unique('vouchers')->ignore($id)],
-            'start_date' => 'required|date_format:Y-m-d|after_or_equal:today',
-            'expire_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
-            'user_use_count' => 'required|integer|min:1',
-            'use_count' => 'required|integer|min:1',
-            'percent' => 'required|integer|min:0.1',
+            'code'            => ['required', 'min:3', Rule::unique('vouchers')->ignore($id)],
+            'start_date'      => 'required|date_format:Y-m-d|after_or_equal:today',
+            'expire_date'     => 'required|date_format:Y-m-d|after_or_equal:start_date',
+            'user_use_count'  => 'required|integer|min:1',
+            'use_count'       => 'required|integer|min:1',
+            'percent'         => 'required|integer|min:0.1',
             'min_order_price' => 'required|numeric|min:0',
 
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
@@ -99,19 +106,19 @@ class VouchersController extends Controller
 
         $voucher->update([
 //            'image' => $request->image,
-            'title_ar' => $request->title_ar,
-            'title_en' => $request->title_en,
+            'title_ar'        => $request->title_ar,
+            'title_en'        => $request->title_en,
 //            'desc_ar' => $request->desc_ar,
 //            'desc_en' => $request->desc_en,
-            'code' => $request->code,
-            'start_date' => $request->start_date,
-            'expire_date' => $request->expire_date,
-            'user_use_count' => $request->user_use_count,
-            'use_count' => $request->use_count,
+            'code'            => $request->code,
+            'start_date'      => $request->start_date,
+            'expire_date'     => $request->expire_date,
+            'user_use_count'  => $request->user_use_count,
+            'use_count'       => $request->use_count,
             'min_order_price' => $request->min_order_price,
-            'percent' => $request->percent,
+            'percent'         => $request->percent,
 //            'for_first_order' => $request->has('for_first_order'),
-            'is_active' => $request->has('is_active'),
+            'is_active'       => $request->has('is_active'),
         ]);
 
         session()->flash('success', __('Operation Done Successfully'));
@@ -128,7 +135,6 @@ class VouchersController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -136,12 +142,12 @@ class VouchersController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:vouchers,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
             Voucher::whereIn('id', $ids)->delete();
@@ -223,7 +229,7 @@ class VouchersController extends Controller
     public function filter(Request $request)
     {
         $vouchersQuery = Voucher::query()
-            ->where('type','general')
+            ->where('type', 'general')
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
                 $searchKey = $request->search_key;
                 return $query->where(function ($query) use ($searchKey) {
@@ -248,15 +254,15 @@ class VouchersController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:vouchers,id',
+            'id'        => 'required|exists:vouchers,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $voucher = Voucher::findOrFail($request->id);
+        $voucher            = Voucher::findOrFail($request->id);
         $voucher->is_active = $request->is_active;
         $voucher->save();
         return response()->json(['success' => __('Operation Done Successfully')]);
@@ -265,15 +271,15 @@ class VouchersController extends Controller
     public function changeFirstOrder(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:vouchers,id',
+            'id'              => 'required|exists:vouchers,id',
             'for_first_order' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $voucher = Voucher::findOrFail($request->id);
+        $voucher                  = Voucher::findOrFail($request->id);
         $voucher->for_first_order = $request->for_first_order;
         $voucher->save();
         return response()->json(['success' => __('Operation Done Successfully')]);

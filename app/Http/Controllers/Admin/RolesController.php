@@ -15,6 +15,14 @@ use Yajra\DataTables\Facades\DataTables;
 
 class RolesController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:roles_list')->only(['index', 'getData']);
+        $this->middleware('permission:roles_create')->only(['create', 'store']);
+        $this->middleware('permission:roles_edit')->only(['edit', 'update']);
+        $this->middleware('permission:roles_delete')->only(['destroy', 'bulkDelete']);
+    }
     public function index()
     {
         return view('roles.list', [

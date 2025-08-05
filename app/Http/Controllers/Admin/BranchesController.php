@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -14,10 +13,18 @@ use Yajra\DataTables\Facades\DataTables;
 
 class BranchesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:branches_list')->only(['index', 'getData']);
+        $this->middleware('permission:branches_create')->only(['create', 'store']);
+        $this->middleware('permission:branches_edit')->only(['edit', 'update', 'changeStatus', 'bulkChangeStatus', 'deleteImage']);
+        $this->middleware('permission:branches_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index()
     {
         return view('branches.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -29,33 +36,33 @@ class BranchesController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'image' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'title_ar' => 'required|min:3',
-            'title_en' => 'required|min:3',
-            'desc_ar' => 'nullable|max:3000',
-            'desc_en' => 'nullable|max:3000',
+            'image'      => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'title_ar'   => 'required|min:3',
+            'title_en'   => 'required|min:3',
+            'desc_ar'    => 'nullable|max:3000',
+            'desc_en'    => 'nullable|max:3000',
             'address_ar' => 'required|max:255',
             'address_en' => 'required|max:255',
-            'lat' => 'required|max:255',
-            'lng' => 'required|max:255',
+            'lat'        => 'required|max:255',
+            'lng'        => 'required|max:255',
 
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $branch = Branch::create([
-            'image' => $request->image,
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
-            'desc_ar' =>$request->desc_ar,
-            'desc_en' =>$request->desc_en,
-            'address_ar' =>$request->address_ar,
-            'address_en' =>$request->address_en,
-            'lat' =>$request->lat,
-            'lng' =>$request->lng,
-            'is_active' => $request->has('is_active'),
+            'image'      => $request->image,
+            'title_ar'   => $request->title_ar,
+            'title_en'   => $request->title_en,
+            'desc_ar'    => $request->desc_ar,
+            'desc_en'    => $request->desc_en,
+            'address_ar' => $request->address_ar,
+            'address_en' => $request->address_en,
+            'lat'        => $request->lat,
+            'lng'        => $request->lng,
+            'is_active'  => $request->has('is_active'),
         ]);
 
         // save product gallery
@@ -74,40 +81,40 @@ class BranchesController extends Controller
     public function edit($id)
     {
         $category = Branch::findOrFail($id);
-        return view('branches.edit',compact('category'));
+        return view('branches.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'title_ar' => 'required|min:3',
-            'title_en' => 'required|min:3',
-            'desc_ar' => 'nullable|max:3000',
-            'desc_en' => 'nullable|max:3000',
+            'title_ar'   => 'required|min:3',
+            'title_en'   => 'required|min:3',
+            'desc_ar'    => 'nullable|max:3000',
+            'desc_en'    => 'nullable|max:3000',
             'address_ar' => 'required|max:255',
             'address_en' => 'required|max:255',
-            'lat' => 'required|max:255',
-            'lng' => 'required|max:255',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'lat'        => 'required|max:255',
+            'lng'        => 'required|max:255',
+            'image'      => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $branch = Branch::findOrFail($id);
 
         $branch->update([
-            'image' => $request->image,
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
-            'desc_ar' =>$request->desc_ar,
-            'desc_en' =>$request->desc_en,
-            'address_ar' =>$request->address_ar,
-            'address_en' =>$request->address_en,
-            'lat' =>$request->lat,
-            'lng' =>$request->lng,
-            'is_active' => $request->has('is_active'),
+            'image'      => $request->image,
+            'title_ar'   => $request->title_ar,
+            'title_en'   => $request->title_en,
+            'desc_ar'    => $request->desc_ar,
+            'desc_en'    => $request->desc_en,
+            'address_ar' => $request->address_ar,
+            'address_en' => $request->address_en,
+            'lat'        => $request->lat,
+            'lng'        => $request->lng,
+            'is_active'  => $request->has('is_active'),
         ]);
 
         // save product gallery
@@ -119,7 +126,6 @@ class BranchesController extends Controller
             }
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -129,11 +135,10 @@ class BranchesController extends Controller
         try {
             $category = Branch::findOrFail($id);
             $category->delete();
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
-
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -153,17 +158,17 @@ class BranchesController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:branches,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            Branch::whereIn('id',$ids)->delete();
+            Branch::whereIn('id', $ids)->delete();
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -174,19 +179,19 @@ class BranchesController extends Controller
     public function bulkChangeStatus(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:branches,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            Branch::whereIn('id',$ids)->update([
-                'is_active' => $request->is_active ?? 0
+            Branch::whereIn('id', $ids)->update([
+                'is_active' => $request->is_active ?? 0,
             ]);
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -202,7 +207,7 @@ class BranchesController extends Controller
                 return '
                     <th scope="row">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="'.$row->id.'">
+                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="' . $row->id . '">
                         </div>
                     </th>
                 ';
@@ -218,15 +223,15 @@ class BranchesController extends Controller
             })
             ->addColumn('action', function ($row) {
                 $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
-                        <a href="'.route('branches.edit',$row->id).'" class="text-primary d-inline-block edit-item-btn">
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
+                        <a href="' . route('branches.edit', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-pencil-fill fs-16"></i>
                         </a>
                     </li>
                 ';
                 $actionButtons .= '
-                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Remove').'">
-                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="'.$row->id.'" href="#deleteRecordModal">
+                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Remove') . '">
+                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal">
                                 <i class="ri-delete-bin-5-fill fs-16"></i>
                             </a>
                         </li>
@@ -240,14 +245,14 @@ class BranchesController extends Controller
             ->editColumn('image', function ($row) {
                 return '
                     <div class="avatar-sm bg-light rounded p-1 me-2">
-                        <img src="'. $row->image .'" alt="" class="img-fluid d-block" />
+                        <img src="' . $row->image . '" alt="" class="img-fluid d-block" />
                     </div>
                 ';
             })
             ->editColumn('created_at', function ($row) {
                 return Carbon::parse($row->created_at)->toDateString();
             })
-            ->rawColumns(['select','image', 'action'])
+            ->rawColumns(['select', 'image', 'action'])
             ->make();
     }
 
@@ -266,14 +271,14 @@ class BranchesController extends Controller
                 });
             })
             ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
-                $query->where('created_at','>=',$request->from_date);
+                $query->where('created_at', '>=', $request->from_date);
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
-                $query->where('created_at','<=',$request->to_date);
+                $query->where('created_at', '<=', $request->to_date);
             })
             ->when($request->has('status') && $request->filled('status'), function ($query) use ($request) {
-                if (in_array($request->status,[0,1])) {
-                    $query->where('is_active',$request->status);
+                if (in_array($request->status, [0, 1])) {
+                    $query->where('is_active', $request->status);
                 }
             });
 
@@ -283,15 +288,15 @@ class BranchesController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:branches,id',
+            'id'        => 'required|exists:branches,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $category = Branch::findOrFail($request->id);
+        $category            = Branch::findOrFail($request->id);
         $category->is_active = $request->is_active;
         $category->save();
         return response()->json(['success' => __('Operation Done Successfully')]);

@@ -1,20 +1,27 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use App\Http\Controllers\Controller;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class PackageController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:packages_list')->only(['index', 'getData']);
+        $this->middleware('permission:packages_create')->only(['create', 'store']);
+        $this->middleware('permission:packages_edit')->only(['edit', 'update']);
+        $this->middleware('permission:packages_delete')->only(['destroy']);
+    }
+
     public function index()
     {
         return view('package.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -28,8 +35,8 @@ class PackageController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'from' => 'required|numeric|min:0',
-            'to' => 'required|numeric|min:0|gte:from',
-            'fee' => 'required|numeric|min:0|max:100',
+            'to'   => 'required|numeric|min:0|gte:from',
+            'fee'  => 'required|numeric|min:0|max:100',
         ]);
         Package::create($request->all());
 
@@ -49,8 +56,8 @@ class PackageController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'from' => 'required|numeric|min:0',
-            'to' => 'required|numeric|min:0|gte:from',
-            'fee' => 'required|numeric|min:0|max:100',
+            'to'   => 'required|numeric|min:0|gte:from',
+            'fee'  => 'required|numeric|min:0|max:100',
         ]);
 
         $package->update($request->all());
@@ -66,9 +73,9 @@ class PackageController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        $ids = explode(',', $request->ids);
+        $ids       = explode(',', $request->ids);
         $validator = Validator::make(['ids' => $ids], [
-            'ids' => 'required|array',
+            'ids'   => 'required|array',
             'ids.*' => 'required|integer|exists:packages,id',
         ]);
 
@@ -91,8 +98,8 @@ class PackageController extends Controller
             ->editColumn('fee', fn($row) => $row->fee . ' %')
             ->addColumn('action', function ($row) {
                 return '<ul class="list-inline hstack gap-2 mb-0">'
-                    . '<li class="list-inline-item edit"><a href="' . route('packages.edit', $row->id) . '" class="text-primary"><i class="ri-pencil-fill fs-16"></i></a></li>'
-                    . '<li class="list-inline-item"><a href="#deleteModal" class="text-danger" data-model-id="' . $row->id . '" data-bs-toggle="modal"><i class="ri-delete-bin-5-fill fs-16"></i></a></li>'
+                . '<li class="list-inline-item edit"><a href="' . route('packages.edit', $row->id) . '" class="text-primary"><i class="ri-pencil-fill fs-16"></i></a></li>'
+                . '<li class="list-inline-item"><a href="#deleteModal" class="text-danger" data-model-id="' . $row->id . '" data-bs-toggle="modal"><i class="ri-delete-bin-5-fill fs-16"></i></a></li>'
                     . '</ul>';
             })
             ->rawColumns(['select', 'action'])
@@ -110,7 +117,7 @@ class PackageController extends Controller
     public function columns(): array
     {
         return [
-            ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex',  'orderable' => false, 'searchable' => false],
+            ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false],
             ['data' => 'name', 'name' => 'name', 'label' => __('Name')],
             ['data' => 'from', 'name' => 'from', 'label' => __('From')],
             ['data' => 'to', 'name' => 'to', 'label' => __('To')],

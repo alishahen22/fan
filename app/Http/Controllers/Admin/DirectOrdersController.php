@@ -1,47 +1,42 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\NotificationActionEnum;
-
-use App\Enums\OrderStatusEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\DirectOrder;
-use App\Models\Notification;
-use App\Models\Order;
-use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class DirectOrdersController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware('permission:direct_orders_list')->only(['index', 'getData']);
+        $this->middleware('permission:direct_orders_view')->only(['show']);
+        $this->middleware('permission:direct_orders_edit')->only(['reply']);
+        $this->middleware('permission:direct_orders_delete')->only(['destroy', 'bulkDelete']);
+    }
 
     public function index()
     {
         return view('direct_orders.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
     public function show($id)
     {
 
-        $order = DirectOrder::findOrFail($id);
+        $order          = DirectOrder::findOrFail($id);
         $order->seen_at = Carbon::now();
         $order->save();
         return view('direct_orders.edit', [
             'title' => 'تفاصيل الطلب المباشر',
-            'data' => $order
+            'data'  => $order,
         ]);
     }
-
 
     /**
      * @param Request $request
@@ -118,21 +113,19 @@ class DirectOrdersController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'reply' => [
-                'required'
+                'required',
             ],
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
-        $order = DirectOrder::findOrFail($id);
+        $order        = DirectOrder::findOrFail($id);
         $order->reply = $request->reply;
         $order->save();
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
-
-
 
     public function columns()
     {
@@ -157,7 +150,6 @@ class DirectOrdersController extends Controller
             return redirect()->back();
         }
 
-
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
@@ -165,12 +157,12 @@ class DirectOrdersController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',', $request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:direct_orders,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator);
             }
             DirectOrder::whereIn('id', $ids)->delete();

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -13,10 +12,18 @@ use Yajra\DataTables\Facades\DataTables;
 
 class AttributesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:attributes_list')->only(['index', 'getData']);
+        $this->middleware('permission:attributes_create')->only(['create', 'store']);
+        $this->middleware('permission:attributes_edit')->only(['edit', 'update', 'changeStatus', 'bulkChangeStatus']);
+        $this->middleware('permission:attributes_delete')->only(['destroy', 'bulkDelete']);
+    }
+
     public function index()
     {
         return view('attributes.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -30,17 +37,17 @@ class AttributesController extends Controller
         $validator = Validator::make($request->all(), [
             'title_ar' => 'required|min:1',
             'title_en' => 'required|min:1',
-            'type' => 'required',
+            'type'     => 'required',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         Attribute::create([
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
-            'type' =>$request->type,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
+            'type'      => $request->type,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -51,7 +58,7 @@ class AttributesController extends Controller
     public function edit($id)
     {
         $category = Attribute::findOrFail($id);
-        return view('attributes.edit',compact('category'));
+        return view('attributes.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
@@ -59,19 +66,19 @@ class AttributesController extends Controller
         $validator = Validator::make($request->all(), [
             'title_ar' => 'required|min:1',
             'title_en' => 'required|min:1',
-            'type' => 'required',
+            'type'     => 'required',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
         $category = Attribute::findOrFail($id);
 
         $category->update([
-            'title_ar' => $request->title_ar,
-            'title_en' =>$request->title_en,
-            'type' =>$request->type,
+            'title_ar'  => $request->title_ar,
+            'title_en'  => $request->title_en,
+            'type'      => $request->type,
             'is_active' => $request->has('is_active'),
         ]);
 
@@ -84,11 +91,10 @@ class AttributesController extends Controller
         try {
             $category = Attribute::findOrFail($id);
             $category->delete();
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
-
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -97,17 +103,17 @@ class AttributesController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:attributes,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            Attribute::whereIn('id',$ids)->delete();
+            Attribute::whereIn('id', $ids)->delete();
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -118,19 +124,19 @@ class AttributesController extends Controller
     public function bulkChangeStatus(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:attributes,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
-            Attribute::whereIn('id',$ids)->update([
-                'is_active' => $request->is_active ?? 0
+            Attribute::whereIn('id', $ids)->update([
+                'is_active' => $request->is_active ?? 0,
             ]);
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -146,7 +152,7 @@ class AttributesController extends Controller
                 return '
                     <th scope="row">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="'.$row->id.'">
+                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="' . $row->id . '">
                         </div>
                     </th>
                 ';
@@ -162,15 +168,15 @@ class AttributesController extends Controller
             })
             ->addColumn('action', function ($row) {
                 $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
-                        <a href="'.route('attributes.edit',$row->id).'" class="text-primary d-inline-block edit-item-btn">
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
+                        <a href="' . route('attributes.edit', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-pencil-fill fs-16"></i>
                         </a>
                     </li>
                 ';
                 $actionButtons .= '
-                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Remove').'">
-                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="'.$row->id.'" href="#deleteRecordModal">
+                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Remove') . '">
+                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal">
                                 <i class="ri-delete-bin-5-fill fs-16"></i>
                             </a>
                         </li>
@@ -187,10 +193,10 @@ class AttributesController extends Controller
             })
 
             ->editColumn('type', function ($row) {
-                return trans('lang.'.$row->type);
+                return trans('lang.' . $row->type);
             })
 
-            ->rawColumns(['select','image', 'action'])
+            ->rawColumns(['select', 'image', 'action'])
             ->make();
     }
 
@@ -209,14 +215,14 @@ class AttributesController extends Controller
                 });
             })
             ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
-                $query->where('created_at','>=',$request->from_date);
+                $query->where('created_at', '>=', $request->from_date);
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
-                $query->where('created_at','<=',$request->to_date);
+                $query->where('created_at', '<=', $request->to_date);
             })
             ->when($request->has('status') && $request->filled('status'), function ($query) use ($request) {
-                if (in_array($request->status,[0,1])) {
-                    $query->where('is_active',$request->status);
+                if (in_array($request->status, [0, 1])) {
+                    $query->where('is_active', $request->status);
                 }
             });
 
@@ -226,15 +232,15 @@ class AttributesController extends Controller
     public function changeStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:attributes,id',
+            'id'        => 'required|exists:attributes,id',
             'is_active' => 'required|in:0,1',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return response()->json(['error' => $validator->errors()->first()]);
         }
 
-        $category = Attribute::findOrFail($request->id);
+        $category            = Attribute::findOrFail($request->id);
         $category->is_active = $request->is_active;
         $category->save();
         return response()->json(['success' => __('Operation Done Successfully')]);
@@ -245,7 +251,7 @@ class AttributesController extends Controller
         return [
             ['data' => 'DT_RowIndex', 'name' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false],
             ['data' => 'title_' . App::getLocale(), 'name' => 'title_' . App::getLocale(), 'label' => __('Title')],
-            ['data' => 'type', 'name' => 'type' , 'label' => __('type')],
+            ['data' => 'type', 'name' => 'type', 'label' => __('type')],
             ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
         ];
     }

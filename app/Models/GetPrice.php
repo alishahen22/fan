@@ -16,7 +16,8 @@ class GetPrice extends Model
             'subject',
             'message',
             'reply',
-            'seen_at'
+            'seen_at',
+            'file'
         ];
 
 
@@ -28,5 +29,14 @@ class GetPrice extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+     public function getFileAttribute($image)
+    {
+
+        if (!empty($image) && file_exists(public_path('storage/get_price_files/' . $image))) {
+            return asset('storage') . '/get_price_files/' . $image;
+        }
+        return null;
     }
 }
