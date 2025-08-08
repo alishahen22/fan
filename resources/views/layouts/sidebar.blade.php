@@ -320,7 +320,22 @@ use App\Helpers\PermissionHelper;
                 @endif
                 @endpermission
 
-              
+                @permission('roles_list')
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ Request::routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                        <i class="ri-lock-2-fill"></i> <span>@lang('Roles & Permissions')</span>
+                    </a>
+                </li>
+                @endpermission
+
+                @permission('admins_list')
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ Request::routeIs('admins.*') ? 'active' : '' }}"
+                       href="{{ route('admins.index') }}">
+                        <i class="ri-user-2-fill"></i> <span>@lang('Admins')</span>
+                    </a>
+                </li>
+                @endpermission
 
                 @permission('point_settings_list')
                 <li class="nav-item">
