@@ -24,16 +24,16 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'site_name_ar' => 'required|min:3',
+            'site_name_ar' => 'required|min:2',
             'address_ar' => 'required|min:3',
-            'site_name_en' => 'required|min:3',
+            'site_name_en' => 'required|min:2',
             'address_en' => 'required|min:3',
             'phone' => 'required|min:8',
             'email' => 'required|email',
             'registration_number' => 'required|min:3',
             'website' => 'required|min:3',
-            'android_version' => 'required|in:0,1',
-            'ios_version' => 'required|in:0,1',
+           // 'android_version' => 'required|in:0,1',
+          //  'ios_version' => 'required|in:0,1',
             'facebook' => 'required|url',
             'twitter' => 'required|url',
             'instagram' => 'required|url',
