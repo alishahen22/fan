@@ -1,13 +1,11 @@
-# ---------- Base PHP-FPM ----------
+# ---------- PHP-FPM + Composer ----------
 FROM php:8.2-fpm
 
 # Set working directory
 WORKDIR /var/www
 
-# Install system dependencies + nginx + supervisor
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
-    nginx \
-    supervisor \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -15,14 +13,8 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy application files
+# Copy existing application
 COPY . .
-
-# Copy Nginx config
-COPY docker/nginx.conf /etc/nginx/sites-available/default
-
-# Copy Supervisor config
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
@@ -31,8 +23,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-pl
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Expose ports
-EXPOSE 9001
+# Expose default php-fpm port
+EXPOSE 9000
 
-# Start supervisord (which will run PHP-FPM & Nginx)
-CMD ["/usr/bin/supervisord", "-n"]
+# Start PHP-FPM
+CMD ["php-fpm"]
