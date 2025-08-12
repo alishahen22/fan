@@ -19,10 +19,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Copy Nginx config
-COPY nginx.conf /etc/nginx/sites-available/default
+COPY docker/nginx.conf /etc/nginx/sites-available/default
 
 # Copy Supervisor config
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
