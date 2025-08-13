@@ -25,7 +25,7 @@ class ProfileController extends Controller
             'name' => 'required|min:3',
             'email' => 'required|email|unique:admins,email,' . auth()->id(),
             'phone' => 'required|min:7',
-            'password' => ['nullable','confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password' => ['nullable',Password::min(8)],
         ]);
 
         if (!is_array($validator) && $validator->fails()) {
