@@ -44,7 +44,7 @@ class AuthController extends Controller
             return msg(false, trans('Invalid email number or password'), Response::HTTP_UNAUTHORIZED);
         }
         if ($user) {
-            if ($user->email_verified_at == null) {
+             if ($user->email_verified_at == null) {
                 auth('user')->logout();
                 return msg(false, trans('Verify phone first'), Response::HTTP_NOT_ACCEPTABLE);
             }
@@ -154,15 +154,14 @@ class AuthController extends Controller
     public function verifySignUp(verifySignUpRequest $request): JsonResponse
     {
         $data = $request->validated();
-//        $data['country_code'] = str_replace('+', '', $data['country_code']);
-        $phone = "+966" . $data['phone'];
-        if ($data['code'] == "9999") {
-            $exist_token = PasswordResetToken::where('email', $phone)->first();
-        } else {
-            $exist_token = PasswordResetToken::where('email', $phone)->where('token', $data['code'])->first();
-        }
+        // $phone = "+966" . $data['phone'];
+        // if ($data['code'] == "9999") {
+        //     $exist_token = PasswordResetToken::where('email', $phone)->first();
+        // } else {
+        //     $exist_token = PasswordResetToken::where('email', $phone)->where('token', $data['code'])->first();
+        // }
 
-        if ($exist_token) {
+       // if ($exist_token) {
             $data['email_verified_at'] = Carbon::now();
             $user = User::create($data);
             $token = auth('user')->login($user);
@@ -173,10 +172,10 @@ class AuthController extends Controller
             $result['user_data'] = $user;
             $exist_token->delete();
             return msgdata(true, trans('lang.login_s'), $result, ResponseAlias::HTTP_OK);
-        } else {
-            return msg(false, trans('lang.otp_invalid'), ResponseAlias::HTTP_BAD_REQUEST);
+        // } else {
+        //     return msg(false, trans('lang.otp_invalid'), ResponseAlias::HTTP_BAD_REQUEST);
 
-        }
+        // }
     }
 
     public function forgetPassword(ForgetPasswordRequest $request): JsonResponse
