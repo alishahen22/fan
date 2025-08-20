@@ -170,7 +170,7 @@ class AuthController extends Controller
             }
             $result['token'] = $token;
             $result['user_data'] = $user;
-            $exist_token->delete();
+        //    $exist_token->delete();
             return msgdata(true, trans('lang.login_s'), $result, ResponseAlias::HTTP_OK);
         // } else {
         //     return msg(false, trans('lang.otp_invalid'), ResponseAlias::HTTP_BAD_REQUEST);
