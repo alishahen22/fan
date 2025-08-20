@@ -21,6 +21,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
 
+        
             if($request->user_id){
                 session(['user_id' => $request->user_id]);
             }else{

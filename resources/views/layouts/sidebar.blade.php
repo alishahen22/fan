@@ -1,6 +1,7 @@
 @php
 use App\Helpers\PermissionHelper;
 @endphp
+
 <!-- ========== App Menu ========== -->
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
@@ -64,6 +65,7 @@ use App\Helpers\PermissionHelper;
                     $new_orders = \App\Models\Order::where('status','pending')->count();
                     $new_direct_orders = \App\Models\DirectOrder::where('seen_at',null)->count();
                     $new_get_prices = \App\Models\GetPrice::where('seen_at',null)->count();
+                    $un_seen_messages = \App\Models\Contact::where('seen_at',null)->count();
                 @endphp
 
                 @permission('orders_list')
@@ -111,117 +113,139 @@ use App\Helpers\PermissionHelper;
                 </li>
                 @endpermission
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-components">التجهيزات</span></li>
-                @permission('categories_list')
+
+                @permission('products_list|categories_list|attributes_list')
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('categories.*') ? 'active' : '' }}"
-                       href="{{ route('categories.index') }}">
-                        <i class="ri-list-check"></i> <span>@lang('Categories')</span>
+                    <a class="nav-link menu-link {{ Request::routeIs('products.*') || Request::routeIs('categories.*') || Request::routeIs('attributes.*') ? 'active' : '' }}"
+                    href="#sidebarProducts" data-bs-toggle="collapse" role="button"
+                    aria-expanded="{{ Request::routeIs('products.*') || Request::routeIs('categories.*') || Request::routeIs('attributes.*') }}"
+                    aria-controls="sidebarProducts">
+                        <i class="ri-store-2-line"></i> <span>@lang('إدارة المنتجات')</span>
                     </a>
+                    <div class="menu-dropdown collapse {{ Request::routeIs('products.*') || Request::routeIs('categories.*') || Request::routeIs('attributes.*') ? 'show' : '' }}"
+                        id="sidebarProducts">
+                        <ul class="nav nav-sm flex-column">
+                            @permission('categories_list')
+                            <li class="nav-item">
+                                <a href="{{ route('categories.index') }}" class="nav-link {{ Request::routeIs('categories.*') ? 'active' : '' }}">
+                                    <i class="ri-list-check"></i> @lang('Categories')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('attributes_list')
+                            <li class="nav-item">
+                                <a href="{{ route('attributes.index') }}" class="nav-link {{ Request::routeIs('attributes.*') ? 'active' : '' }}">
+                                    <i class="ri-list-check"></i> @lang('attributes')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('products_list')
+                            <li class="nav-item">
+                                <a href="{{ route('products.index') }}" class="nav-link {{ Request::routeIs('products.*') ? 'active' : '' }}">
+                                    <i class="ri-list-check"></i> @lang('Products')
+                                </a>
+                            </li>
+                            @endpermission
+                        </ul>
+                    </div>
                 </li>
                 @endpermission
 
-                @permission('attributes_list')
+                @permission('sliders_list|banners_list|steps_list|reviews_list|offers_list|splashes_list')
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('attributes.*') ? 'active' : '' }}"
-                       href="{{ route('attributes.index') }}">
-                        <i class="ri-list-check"></i> <span>@lang('attributes')</span>
+                    <a class="nav-link menu-link {{ Request::routeIs('sliders.*') || Request::routeIs('banners.*') || Request::routeIs('steps.*') || Request::routeIs('reviews.*') || Request::routeIs('offers.*') || Request::routeIs('splashes.*') ? 'active' : '' }}"
+                    href="#sidebarContent" data-bs-toggle="collapse" role="button"
+                    aria-expanded="{{ Request::routeIs('sliders.*') || Request::routeIs('banners.*') || Request::routeIs('steps.*') || Request::routeIs('reviews.*') || Request::routeIs('offers.*') || Request::routeIs('splashes.*') }}"
+                    aria-controls="sidebarContent">
+                        <i class="ri-image-2-line"></i> <span>@lang('إدارة المحتوى')</span>
                     </a>
+                    <div class="menu-dropdown collapse {{ Request::routeIs('sliders.*') || Request::routeIs('banners.*') || Request::routeIs('steps.*') || Request::routeIs('reviews.*') || Request::routeIs('offers.*') || Request::routeIs('splashes.*') ? 'show' : '' }}"
+                        id="sidebarContent">
+                        <ul class="nav nav-sm flex-column">
+                            @permission('sliders_list')
+                            <li class="nav-item">
+                                <a href="{{ route('sliders.index') }}" class="nav-link {{ Request::routeIs('sliders.*') ? 'active' : '' }}">
+                                    @lang('Sliders')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('banners_list')
+                            <li class="nav-item">
+                                <a href="{{ route('banners.index') }}" class="nav-link {{ Request::routeIs('banners.*') ? 'active' : '' }}">
+                                    @lang('banners')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('steps_list')
+                            <li class="nav-item">
+                                <a href="{{ route('steps.index') }}" class="nav-link {{ Request::routeIs('steps.*') ? 'active' : '' }}">
+                                    @lang('steps')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('reviews_list')
+                            <li class="nav-item">
+                                <a href="{{ route('reviews.index') }}" class="nav-link {{ Request::routeIs('reviews.*') ? 'active' : '' }}">
+                                    @lang('reviews')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('offers_list')
+                            <li class="nav-item">
+                                <a href="{{ route('offers.index') }}" class="nav-link {{ Request::routeIs('offers.*') ? 'active' : '' }}">
+                                    @lang('offers')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('splashes_list')
+                            <li class="nav-item">
+                                <a href="{{ route('splashes.index') }}" class="nav-link {{ Request::routeIs('splashes.*') ? 'active' : '' }}">
+                                    @lang('splashes')
+                                </a>
+                            </li>
+                            @endpermission
+                        </ul>
+                    </div>
                 </li>
                 @endpermission
 
-                @permission('products_list')
+                @permission('cities_list|vouchers_list|contacts_list')
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('products.*') ? 'active' : '' }}"
-                       href="{{ route('products.index') }}">
-                        <i class="ri-list-check"></i> <span>@lang('Products')</span>
+                    <a class="nav-link menu-link {{ Request::routeIs('cities.*') || Request::routeIs('vouchers.*') || Request::routeIs('contacts.*') ? 'active' : '' }}"
+                    href="#sidebarServices" data-bs-toggle="collapse" role="button"
+                    aria-expanded="{{ Request::routeIs('cities.*') || Request::routeIs('vouchers.*') || Request::routeIs('contacts.*') }}"
+                    aria-controls="sidebarServices">
+                        <i class="ri-customer-service-2-line"></i> <span>@lang('الخدمات والتسويق')</span>
                     </a>
-                </li>
-                @endpermission
-
-                @permission('sliders_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('sliders.*') ? 'active' : '' }}"
-                       href="{{ route('sliders.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('Sliders')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('banners_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('banners.*') ? 'active' : '' }}"
-                       href="{{ route('banners.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('banners')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('steps_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('steps.*') ? 'active' : '' }}"
-                       href="{{ route('steps.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('steps')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('reviews_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('reviews.*') ? 'active' : '' }}"
-                       href="{{ route('reviews.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('reviews')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('offers_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('offers.*') ? 'active' : '' }}"
-                       href="{{ route('offers.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('offers')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('splashes_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('splashes.*') ? 'active' : '' }}"
-                       href="{{ route('splashes.index') }}">
-                        <i class="ri-image-line"></i> <span>@lang('splashes')</span>
-                    </a>
-                </li>
-                @endpermission
-                @permission('cities_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('cities.*') ? 'active' : '' }}"
-                       href="{{ route('cities.index') }}">
-                        <i class=" ri-map-pin-line"></i> <span>@lang('cities')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @permission('vouchers_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('vouchers.*') ? 'active' : '' }}"
-                       href="{{ route('vouchers.index') }}">
-                        <i class=" ri-price-tag-3-line"></i> <span>@lang('Vouchers')</span>
-                    </a>
-                </li>
-                @endpermission
-
-                @php
-                    $un_seen_messages = \App\Models\Contact::where('seen_at',null)->count();
-                @endphp
-                @permission('contacts_list')
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ Request::routeIs('contacts.*') ? 'active' : '' }}"
-                       href="{{ route('contacts.index') }}">
-                        <i class=" ri-price-tag-3-line"></i> <span>التواصل معنا</span>
-                        @if($un_seen_messages > 0)
-                        <span class="badge badge-pill bg-danger"
-                              data-key="t-hot">{{$un_seen_messages}}</span>
-                            @endif
-                    </a>
+                    <div class="menu-dropdown collapse {{ Request::routeIs('cities.*') || Request::routeIs('vouchers.*') || Request::routeIs('contacts.*') ? 'show' : '' }}"
+                        id="sidebarServices">
+                        <ul class="nav nav-sm flex-column">
+                            @permission('cities_list')
+                            <li class="nav-item">
+                                <a href="{{ route('cities.index') }}" class="nav-link {{ Request::routeIs('cities.*') ? 'active' : '' }}">
+                                    <i class="ri-map-pin-line"></i> @lang('cities')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('vouchers_list')
+                            <li class="nav-item">
+                                <a href="{{ route('vouchers.index') }}" class="nav-link {{ Request::routeIs('vouchers.*') ? 'active' : '' }}">
+                                    <i class="ri-price-tag-3-line"></i> @lang('Vouchers')
+                                </a>
+                            </li>
+                            @endpermission
+                            @permission('contacts_list')
+                            <li class="nav-item">
+                                <a href="{{ route('contacts.index') }}" class="nav-link {{ Request::routeIs('contacts.*') ? 'active' : '' }}">
+                                    <i class="ri-message-2-line"></i> التواصل معنا
+                                    @if($un_seen_messages > 0)
+                                    <span class="badge badge-pill bg-danger" data-key="t-hot">{{$un_seen_messages}}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            @endpermission
+                        </ul>
+                    </div>
                 </li>
                 @endpermission
 
@@ -368,3 +392,5 @@ use App\Helpers\PermissionHelper;
 <!-- Left Sidebar End -->
 <!-- Vertical Overlay-->
 <div class="vertical-overlay"></div>
+
+

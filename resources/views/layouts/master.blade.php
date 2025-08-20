@@ -57,5 +57,6 @@
 
     @livewireScripts
 </body>
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
 </html>

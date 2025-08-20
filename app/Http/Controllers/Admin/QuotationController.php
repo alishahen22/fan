@@ -12,9 +12,14 @@ use Yajra\DataTables\Facades\DataTables;
 
 class QuotationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
 
+        if($request->user_id){
+                session(['user_id' => $request->user_id]);
+        }else{
+            session()->forget('user_id');
+        }
 
         return view('quotations.list', [
             'columns' => $this->columns(),
@@ -96,6 +101,9 @@ class QuotationController extends Controller
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
                 $query->where('date', '<=', $request->to_date);
+            })
+              ->when(session('user_id'), function ($query) {
+                return $query->where('user_id', session('user_id'));
             });
         return $query;
     }

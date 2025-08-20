@@ -196,7 +196,11 @@
                     <a href="{{ route('invoices.index'  , 'user_id='.$data->id) }}" class="btn btn-primary btn-sm px-4">
                         عرض جميع الفواتير
                     </a>
-        </div>
+                    <a href="{{ route('quotations.index'  , 'user_id='.$data->id) }}" class="btn btn-primary btn-sm px-4">
+                        عرض جميع عروض السعر
+                    </a>
+                 </div>
+            
         </div>
 
         <!-- فاصل -->
