@@ -188,11 +188,15 @@ class HomeController extends Controller
     }
 
     //categoryProducts
-    public function categoryProducts($type): JsonResponse
+    public function categoryProducts($type, $id = null): JsonResponse
     {
         $data = Product::whereHas('category', function ($q) use ($type) {
             $q->where('type', $type);
-        })->active()->paginate(12);
+        })
+        ->when($id, function ($q) use ($id) {
+            $q->where('category_id', $id);
+        })
+        ->active()->paginate(12);
         $result = ProductResources::collection($data)->response()->getData(true);
         return msgdata(true, trans('lang.success'), $result, ResponseAlias::HTTP_OK);
     }

@@ -1,30 +1,27 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
-use DataTables;
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
 use App\Models\Item;
-use App\Models\Supply;
 use App\Models\PrintService;
+use App\Models\Supply;
+use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
 
 class PrintServiceController extends Controller
 {
     public function index()
     {
         return view('print_services.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
     public function create()
     {
         return view('print_services.create', [
-            'items' => Item::all(),
+            'items'    => Item::all(),
             'supplies' => Supply::all(),
         ]);
 
@@ -33,27 +30,29 @@ class PrintServiceController extends Controller
     public function store(Request $request)
     {
 
-
         $request->validate([
-            'name_ar' => 'required|string',
-            'name_en' => 'required|string',
-            'quantity' => 'required|numeric|min:1',
-            'items' => 'required|array',
-            'items.*' => 'exists:items,id',
-            'supplies' => 'nullable|array',
-            'supplies.*' => 'exists:supplies,id',
+            'name_ar'      => 'required|string',
+            'name_en'      => 'required|string',
+            'quantity'     => 'required|numeric|min:1',
+            'items'        => 'nullable|array',
+            'items.*'      => 'exists:items,id',
+            'supplies'     => 'nullable|array',
+            'supplies.*'   => 'exists:supplies,id',
+            'manual_price' => 'nullable|numeric|min:0',
+            'price_type'   => 'nullable|string|in:per_unit,total',
         ]);
 
-        $items = Item::whereIn('id', $request->items)->get();
+        $items    = Item::whereIn('id', $request->items ?? [])->get();
         $supplies = Supply::whereIn('id', $request->supplies ?? [])->get();
 
-
         $printService = PrintService::create([
-            'name_ar' => $request->name_ar,
-            'name_en' => $request->name_en,
+            'name_ar'  => $request->name_ar,
+            'name_en'  => $request->name_en,
             'quantity' => $request->quantity,
-            'width' => $request->width,
-            'height' => $request->height,
+            'width'    => $request->width,
+            'height'   => $request->height,
+            'manual_price' => $request->manual_price,
+            'price_type'   => $request->manual_price ? $request->price_type : null,
         ]);
 
         $printService->items()->sync($request->items);
@@ -68,8 +67,8 @@ class PrintServiceController extends Controller
 
         return view('print_services.edit', [
             'printService' => $printService,
-            'items' => Item::all(),
-            'supplies' => Supply::all(),
+            'items'        => Item::all(),
+            'supplies'     => Supply::all(),
         ]);
     }
 
@@ -78,28 +77,32 @@ class PrintServiceController extends Controller
         $printService = PrintService::where('id', $id)->where('hidden', false)->firstOrFail();
 
         $request->validate([
-            'name_ar' => 'required|string',
-            'name_en' => 'required|string',
-            'quantity' => 'required|numeric|min:1',
-            'items' => 'required|array',
-            'items.*' => 'exists:items,id',
-            'supplies' => 'nullable|array',
-            'supplies.*' => 'exists:supplies,id',
+            'name_ar'      => 'required|string',
+            'name_en'      => 'required|string',
+            'quantity'     => 'required|numeric|min:1',
+            'items'        => 'nullable|array',
+            'items.*'      => 'exists:items,id',
+            'supplies'     => 'nullable|array',
+            'supplies.*'   => 'exists:supplies,id',
+            'manual_price' => 'nullable|numeric|min:0',
+            'price_type'   => 'nullable|string|in:per_unit,total',
         ]);
 
-        $items = Item::whereIn('id', $request->items)->get();
+        $items    = Item::whereIn('id', $request->items ?? [])->get();
         $supplies = Supply::whereIn('id', $request->supplies ?? [])->get();
 
-        $totalItemPrice = $items->sum('price');
-        $totalSupplyPrice = $supplies->sum('price');
-        $totalPrice = $totalItemPrice + $totalSupplyPrice;
+        // $totalItemPrice   = $items->sum('price');
+        // $totalSupplyPrice = $supplies->sum('price');
+        // $totalPrice       = $totalItemPrice + $totalSupplyPrice;
 
         $printService->update([
-             'name_ar' => $request->name_ar,
-            'name_en' => $request->name_en,
+            'name_ar'  => $request->name_ar,
+            'name_en'  => $request->name_en,
             'quantity' => $request->quantity,
-            'width' => $request->width,
-            'height' => $request->height,
+            'width'    => $request->width,
+            'height'   => $request->height,
+            'manual_price' => $request->manual_price,
+            'price_type'   => $request->manual_price ? $request->price_type : null,
         ]);
 
         $printService->items()->sync($request->items);
@@ -114,40 +117,36 @@ class PrintServiceController extends Controller
         return redirect()->route('print-services.index')->with('success', __('Deleted successfully'));
     }
 
-
-
-   public function getData(Request $request)
-{
-    return DataTables::eloquent($this->filter($request))
-        ->addIndexColumn()
-        ->addColumn('select', fn($row) =>
-            '<div class="form-check"><input class="form-check-input" type="checkbox" value="'.$row->id.'" name="selected[]"></div>'
-        )
-        ->addColumn('dimensions', fn($row) =>
-            ($row->width && $row->height) ? "{$row->width} × {$row->height}" : '-'
-        )
-      ->addColumn('supplies', fn($row) =>
-            $row->supplies->isNotEmpty()
+    public function getData(Request $request)
+    {
+        return DataTables::eloquent($this->filter($request))
+            ->addIndexColumn()
+            ->addColumn('select', fn($row) =>
+                '<div class="form-check"><input class="form-check-input" type="checkbox" value="' . $row->id . '" name="selected[]"></div>'
+            )
+            ->addColumn('dimensions', fn($row) =>
+                ($row->width && $row->height) ? "{$row->width} × {$row->height}" : '-'
+            )
+            ->addColumn('supplies', fn($row) =>
+                $row->supplies->isNotEmpty()
                 ? $row->supplies->pluck('name_ar')->implode(', ')
                 : 'لا يوجد'
-        )
-        ->addColumn('items', fn($row) =>
-            $row->items->isNotEmpty()
+            )
+            ->addColumn('items', fn($row) =>
+                $row->items->isNotEmpty()
                 ? $row->items->pluck('name_ar')->implode(', ')
                 : 'لا يوجد'
-        )
-        ->addColumn('action', fn($row) =>
-            '<ul class="list-inline hstack gap-2 mb-0">
-                <li class="list-inline-item"><a href="'.route('print-services.edit', $row->id).'" class="text-primary"><i class="ri-pencil-fill fs-16"></i></a></li>
+            )
+            ->addColumn('action', fn($row) =>
+                '<ul class="list-inline hstack gap-2 mb-0">
+                <li class="list-inline-item"><a href="' . route('print-services.edit', $row->id) . '" class="text-primary"><i class="ri-pencil-fill fs-16"></i></a></li>
             </ul>'
-        )
-        ->rawColumns(['select', 'action'])
-        ->make();
-}
+            )
+            ->rawColumns(['select', 'action'])
+            ->make();
+    }
 
-
-
-   public function filter(Request $request)
+    public function filter(Request $request)
     {
         return PrintService::with(['supplies', 'items'])->where('hidden', false)
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
@@ -170,7 +169,5 @@ class PrintServiceController extends Controller
             ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
         ];
     }
-
-
 
 }

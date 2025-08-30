@@ -92,6 +92,15 @@ class PrintService extends Model
         // الناتج النهائي
         $totalPrice = $paperTotal + $suppliesTotal;
 
+        //if items and supplies are empty and manual price is set
+        if ($this->items->isEmpty() && $this->supplies->isEmpty() && $this->manual_price) {
+            if ($this->price_type === 'per_unit') {
+                $totalPrice = $this->manual_price * $this->quantity;
+            } else { // total
+                $totalPrice = $this->manual_price;
+            }
+        }
+
         return [
             'total_price' => round($totalPrice, 2),
             'unit_price' => round($totalPrice / $this->quantity, 4),

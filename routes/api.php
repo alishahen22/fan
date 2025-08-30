@@ -77,7 +77,7 @@ Route::prefix('client')->group(function () {
 
         });
 
-        Route::get('/category-products/{type}', [HomeController::class, 'categoryProducts']);
+        Route::get('/category-products/{type}/{id?}', [HomeController::class, 'categoryProducts']);
 
         Route::get('/offers', [HomeController::class, 'allOffers']);
         Route::get('/offers/products', [HomeController::class, 'offersProducts']);
