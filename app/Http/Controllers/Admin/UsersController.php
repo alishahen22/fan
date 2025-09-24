@@ -42,18 +42,33 @@ class UsersController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
+    //   $validator = Validator::make($request->all(), [
+    //         'name'                      => 'required|min:3',
+    //         'email'                     => 'required|email|unique:users,email',
+    //         'city_id'                   => 'required|exists:cities,id',
+    //         'phone'                     => 'required|min:7|unique:users,phone',
+    //         'discount'                  => 'required|numeric|min:0|max:100',
+    //         'customer_type'             => 'required|in:individual,business',
+    //         'commercial_register'       => 'required_if:customer_type,business|nullable|digits:10',
+    //         'commercial_register_image' => 'required_if:customer_type,business|nullable|image|mimes:jpg,jpeg,png|max:2048',
+    //         'tax_number'                => 'nullable|digits:15',
+    //         'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    //         'password'                  => ['required', 'confirmed'],
+    //     ]);
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'                      => 'required|min:3',
+            'name'                      => 'nullable',
             'email'                     => 'required|email|unique:users,email',
             'city_id'                   => 'required|exists:cities,id',
-            'phone'                     => 'required|min:7|unique:users,phone',
-            'discount'                  => 'required|numeric|min:0|max:100',
+            'phone'                     => 'nullable|unique:users,phone',
+            'discount'                  => 'nullable|numeric|min:0|max:100',
             'customer_type'             => 'required|in:individual,business',
-            'commercial_register'       => 'required_if:customer_type,business|nullable|digits:10',
-            'commercial_register_image' => 'required_if:customer_type,business|nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'tax_number'                => 'nullable|digits:15',
+            'commercial_register'       => 'nullable',
+            'commercial_register_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'tax_number'                => 'nullable',
             'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'password'                  => ['required', 'confirmed'],
         ]);
@@ -90,18 +105,18 @@ class UsersController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name'                      => 'required|min:3',
+   $validator = Validator::make($request->all(), [
+            'name'                      => 'nullable',
             'email'                     => 'required|email|unique:users,email,' . $id,
-            'phone'                     => 'required|min:7|unique:users,phone,' . $id,
             'city_id'                   => 'required|exists:cities,id',
-            'discount'                  => 'required|numeric|min:0|max:100',
+            'phone'                     => 'nullable|unique:users,phone,' . $id,
+            'discount'                  => 'nullable|numeric|min:0|max:100',
             'customer_type'             => 'required|in:individual,business',
-            'commercial_register'       => 'required_if:customer_type,business|digits:10',
+            'commercial_register'       => 'nullable',
             'commercial_register_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'tax_number'                => 'nullable|digits:15',
+            'tax_number'                => 'nullable',
             'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password'                  => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password'                  => ['required', 'confirmed'],
         ]);
 
         if ($validator->fails()) {
