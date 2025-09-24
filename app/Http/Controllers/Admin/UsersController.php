@@ -88,7 +88,9 @@ class UsersController extends Controller
         }
 
         $data['password'] = bcrypt($data['password']);
-
+        if (!isset($data['discount'])) {
+            $data['discount'] = 0;
+        }
         User::create($data);
 
         session()->flash('success', __('Operation Done Successfully'));
@@ -116,7 +118,7 @@ class UsersController extends Controller
             'commercial_register_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'tax_number'                => 'nullable',
             'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password'                  => ['required', 'confirmed'],
+            'password'                  => ['nullable', 'confirmed'],
         ]);
 
         if ($validator->fails()) {
@@ -124,6 +126,9 @@ class UsersController extends Controller
         }
 
         $data = $validator->validated();
+        if (!isset($data['discount'])) {
+            $data['discount'] = 0;
+        }
         $user = User::findOrFail($id);
 
         // رفع الصور (تحديث)

@@ -37,7 +37,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="manufacturer-name-input">الاسم</label>
                             <input type="text" class="form-control" id="name" name="name"
-                                   value="{{ isset($data) ? $data->name : old('name') }}" required>
+                                   value="{{ isset($data) ? $data->name : old('name') }}" >
                             <div class="invalid-feedback">@lang('Please Enter a value')</div>
                         </div>
                         <div class="mb-3">
@@ -50,7 +50,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="manufacturer-name-input">رقم الهاتف</label>
                             <input type="text" class="form-control" id="phone" name="phone"
-                                   value="{{ isset($data) ? $data->phone : old('phone') }}" required>
+                                   value="{{ isset($data) ? $data->phone : old('phone') }}" >
                             <div class="invalid-feedback">@lang('Please Enter a value')</div>
                         </div>
                         <div class="mb-3">
@@ -150,10 +150,8 @@
         function toggleBusinessFields() {
             if ($('#customer_type').val() === 'business') {
                 $('#business-fields').show();
-                $('#commercial_register').prop('required', true);
             } else {
                 $('#business-fields').hide();
-                $('#commercial_register').prop('required', false);
             }
         }
 
