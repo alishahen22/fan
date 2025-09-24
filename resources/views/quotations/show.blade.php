@@ -130,6 +130,7 @@
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
             padding: 0;
+              zoom: 70%; 
         }
         .no-print {
             display: none !important;
@@ -167,8 +168,8 @@
             display: none;
         }
         @page {
-            size: A4;
-            margin: 30mm 20mm 20mm 20mm;
+            size: A4 portrait; /* ممكن كمان تغير لـ landscape */
+        margin: 0;
         }
 
         #footer-table {
@@ -185,7 +186,7 @@
 @section('script')
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
-@if(session('print'))
+@if(session('print'))8
 <script>
     window.onload = function () {
         window.print();
