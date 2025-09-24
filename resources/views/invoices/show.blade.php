@@ -149,6 +149,8 @@
             font-family: 'Vazirmatn', sans-serif;
             margin: 0;
             padding: 0;
+            zoom: 70%;
+
         }
         #print-area {
             width: 100%;
@@ -179,9 +181,9 @@
         footer {
             display: none;
         }
-        @page {
-            size: A4;
-            margin: 30mm 20mm 20mm 20mm;
+         @page {
+            size: A4 portrait;
+           margin: 0;
         }
 
         #footer-table {
