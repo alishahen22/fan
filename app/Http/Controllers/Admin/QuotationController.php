@@ -89,6 +89,7 @@ class QuotationController extends Controller
     public function filter(Request $request)
     {
         $query = Quotation::where('type', 'quotation')
+            ->orderby('id', 'desc')
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
                 $searchKey = $request->search_key;
                 return $query->where(function ($query) use ($searchKey) {

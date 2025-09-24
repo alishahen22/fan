@@ -21,7 +21,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
 
-        
+
             if($request->user_id){
                 session(['user_id' => $request->user_id]);
             }else{
@@ -114,6 +114,7 @@ class InvoiceController extends Controller
     public function filter(Request $request)
     {
         $query = Quotation::where('type', 'invoice')
+            ->orderby('id', 'desc')
             ->when($request->has('search_key') && $request->filled('search_key'), function ($query) use ($request) {
                 $searchKey = $request->search_key;
                 return $query->where(function ($query) use ($searchKey) {
