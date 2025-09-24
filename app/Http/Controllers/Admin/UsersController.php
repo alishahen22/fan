@@ -55,7 +55,7 @@ class UsersController extends Controller
             'commercial_register_image' => 'required_if:customer_type,business|image|mimes:jpg,jpeg,png|max:2048',
             'tax_number'                => 'nullable|digits:15',
             'tax_number_image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'password'                  => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
+            'password'                  => ['required', 'confirmed'],
         ]);
 
         if ($validator->fails()) {
