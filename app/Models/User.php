@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\ActivityLoggable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, ActivityLoggable;
 
     /**
      * The attributes that are mass assignable.
@@ -67,7 +67,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'          => 'hashed',
     ];
 
     protected $appends = ['age'];
@@ -110,7 +110,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Address::class, 'user_id')->where('is_default', 1);
     }
 
-
     public function vouchers()
     {
         return $this->hasMany(VoucherUser::class, 'user_id');
@@ -118,7 +117,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function getImageAttribute($image)
     {
-        if (!empty($image) && file_exists(public_path('storage/clients_images/' . $image))) {
+        if (! empty($image) && file_exists(public_path('storage/clients_images/' . $image))) {
             return asset('storage') . '/clients_images/' . $image;
         }
         return asset('storage/default.png');
@@ -126,7 +125,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function setImageAttribute($image)
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image, 'clients_images');
@@ -139,7 +138,7 @@ class User extends Authenticatable implements JWTSubject
     public function getValueAddedCertificateFileAttribute($image)
     {
 
-        if (!empty($image) && file_exists(public_path('storage/value_added_certificate_files/' . $image))) {
+        if (! empty($image) && file_exists(public_path('storage/value_added_certificate_files/' . $image))) {
             return asset('storage') . '/value_added_certificate_files/' . $image;
         }
         return null;
@@ -147,7 +146,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function setValueAddedCertificateAttribute($image)
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image, 'value_added_certificate_files');
@@ -178,18 +177,17 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-
-      public function getCommercialRegisterImageAttribute($image)
-        {
-            if (!empty($image) && file_exists(public_path('storage/commercial_register_images/' . $image))) {
-                return asset('storage') . '/commercial_register_images/' . $image;
-            }
-            return null;
+    public function getCommercialRegisterImageAttribute($image)
+    {
+        if (! empty($image) && file_exists(public_path('storage/commercial_register_images/' . $image))) {
+            return asset('storage') . '/commercial_register_images/' . $image;
         }
+        return null;
+    }
 
     public function setCommercialRegisterImageAttribute($image): void
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image, 'commercial_register_images');
@@ -200,15 +198,15 @@ class User extends Authenticatable implements JWTSubject
 
     public function getTaxNumberImageAttribute($image)
     {
-        if (!empty($image) && file_exists(public_path('storage/tax_number_images/' . $image))) {
+        if (! empty($image) && file_exists(public_path('storage/tax_number_images/' . $image))) {
             return asset('storage') . '/tax_number_images/' . $image;
         }
         return null;
-        }
+    }
 
     public function setTaxNumberImageAttribute($image): void
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image, 'tax_number_images');

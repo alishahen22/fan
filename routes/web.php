@@ -40,6 +40,15 @@ Route::prefix('/admin')->middleware('auth')->group(function () {
 
     Route::middleware('admin')->group(function () {
 
+        // Activity Logs Routes
+        Route::get('/activity-logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('admin.activity-logs.index');
+        Route::post('/activity-logs/cleanup', [\App\Http\Controllers\Admin\ActivityLogController::class, 'cleanup'])->name('admin.activity-logs.cleanup');
+
+        // Admin Activity Routes
+        Route::get('/admins/{admin}/activity', [\App\Http\Controllers\Admin\AdminActivityController::class, 'show'])->name('admin.admins.activity');
+        Route::get('/admins/{admin}/activity/statistics', [\App\Http\Controllers\Admin\AdminActivityController::class, 'getStatistics'])->name('admin.admins.activity.statistics');
+        Route::get('/admins/{admin}/activity/export', [\App\Http\Controllers\Admin\AdminActivityController::class, 'export'])->name('admin.admins.activity.export');
+
         Route::get('/import-items', [ItemsController::class, 'import'])->name('import.items');
         Route::post('/import-items', [ItemsController::class, 'importItems'])->name('import.items.post');
 

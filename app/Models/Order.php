@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentMethodEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Traits\ActivityLoggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
+    use HasFactory, ActivityLoggable;
     protected $fillable = [
         'order_number',
         'user_id',
@@ -32,10 +33,8 @@ class Order extends Model
         'failure_url',
     ];
 
-    use HasFactory;
-
-    const STATUS = ['pending', 'in_progress','in_way', 'complete', 'cancelled'];
-    const PAYMENT_METHOD = [ 'cash', 'credit', 'apple', 'mada'];
+    const STATUS         = ['pending', 'in_progress', 'in_way', 'complete', 'cancelled'];
+    const PAYMENT_METHOD = ['cash', 'credit', 'apple', 'mada'];
     const PAYMENT_STATUS = ['partial_paid', 'paid', 'unpaid'];
 
     protected $appends = ['quantity'];
@@ -60,12 +59,10 @@ class Order extends Model
         $this->attributes['tax'] = round($tax, 2);
     }
 
-
     public function setTotalAttribute($total)
     {
         $this->attributes['total'] = round($total, 2);
     }
-
 
     protected static function boot()
     {
@@ -132,7 +129,6 @@ class Order extends Model
     {
         return $this->belongsTo(Address::class, 'address_id');
     }
-
 
     public function items()
     {

@@ -1,7 +1,7 @@
 <?php
-
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
     protected $fillable = ['title_ar',
         'title_en',
@@ -28,19 +28,17 @@ class Product extends Model
 
     protected $appends = ['title', 'description', 'price_original'];
 
-
-
     public function getPriceAttribute()
     {
         $price = $this->attributes['price'];
         if ($this->discount > 0) {
             $discount_amount = $price * ($this->discount / 100);
-            $price = $price - $discount_amount;
+            $price           = $price - $discount_amount;
         }
         return $price;
     }
 
-       //get price before discount
+    //get price before discount
     public function getPriceOriginalAttribute()
     {
         return $this->attributes['price'];
@@ -66,7 +64,7 @@ class Product extends Model
 
     public function getImageAttribute($image): string
     {
-        if (!empty($image) && file_exists(public_path('storage/products/' . $image))) {
+        if (! empty($image) && file_exists(public_path('storage/products/' . $image))) {
             return asset('storage') . '/products/' . $image;
         }
         return asset('storage/default.png');
@@ -74,7 +72,7 @@ class Product extends Model
 
     public function setImageAttribute($image): void
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image, 'products');

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GetPrice extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
     protected $fillable =
         [

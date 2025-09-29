@@ -21,6 +21,7 @@
         "myfatoorah/laravel-package": "^2.2",
         "realrashid/sweet-alert": "^7.1",
         "santigarcor/laratrust": "^8.3",
+        "spatie/laravel-activitylog": "^4.10",
         "teckwei1993/laravel-otp": "^1.0",
         "tymon/jwt-auth": "^2.1",
         "wireui/wireui": "^2.4",

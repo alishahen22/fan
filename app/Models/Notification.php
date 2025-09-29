@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
     protected $fillable = [
         'title_ar',
@@ -22,9 +22,8 @@ class Notification extends Model
         'target_type',
     ];
 
-
     const ANDROID = 'android';
-    const IOS = 'ios';
+    const IOS     = 'ios';
     const ACTIONS = [
         'general',
         'change_status',
@@ -35,7 +34,7 @@ class Notification extends Model
 
     const USER_TYPE = ['all', 'custom'];
 
-    protected $appends = ['title','desc'];
+    protected $appends = ['title', 'desc'];
 
     public function getTitleAttribute()
     {
@@ -44,7 +43,7 @@ class Notification extends Model
         } else {
             return $this->title_ar;
         }
-    } public function getDescAttribute()
+    }public function getDescAttribute()
     {
         if (\app()->getLocale() == "en") {
             return $this->desc_en;

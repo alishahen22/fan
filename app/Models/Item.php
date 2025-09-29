@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
      protected $fillable = [
         'name_ar', 'name_en', 'type', 'width_cm', 'height_cm',

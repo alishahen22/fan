@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PrintService extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
     //appends
     protected $appends = ['total_price' ,'item_price'];

@@ -1,7 +1,7 @@
 <?php
-
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Admin extends Authenticatable implements LaratrustUser
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRolesAndPermissions;
+    use HasApiTokens, HasFactory, Notifiable, HasRolesAndPermissions, ActivityLoggable;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +24,7 @@ class Admin extends Authenticatable implements LaratrustUser
         'phone',
         'password',
         'type',
-        'is_active'
+        'is_active',
     ];
 
     /**

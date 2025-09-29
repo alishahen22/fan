@@ -1,12 +1,8 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\ProductImage;
 use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +18,7 @@ class AdminsController extends Controller
     public function index()
     {
         return view('admins.list', [
-            'columns' => $this->columns()
+            'columns' => $this->columns(),
         ]);
     }
 
@@ -39,10 +35,10 @@ class AdminsController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:admins,email',
-            'phone' => 'required|min:7|unique:admins,phone',
-            'pawword' => ['required','confirmed', Password::min(8) ],
+            'name'    => 'required|min:3',
+            'email'   => 'required|email|unique:admins,email',
+            'phone'   => 'required|min:7|unique:admins,phone',
+            'pawword' => ['required', 'confirmed', Password::min(8)],
             // 'password' => ['required','confirmed', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()],
 //            'role_id' => 'nullable|exists:roles,id',
         ]);
@@ -52,16 +48,16 @@ class AdminsController extends Controller
         // }
 
         $admin = Admin::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-          //  'type' =>  $request->type
+            //  'type' =>  $request->type
 
         ]);
 
         // assign role
-    $admin->addRole($request->role);
+        $admin->addRole($request->role);
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -81,7 +77,7 @@ class AdminsController extends Controller
 
 //        $adminRole = $admin->roles()->first();
 
-        return view('admins.edit',[
+        return view('admins.edit', [
             'admin' => $admin,
 //            'roles' => $roles,
 //            'adminRole' => $adminRole,
@@ -91,15 +87,15 @@ class AdminsController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3',
-            'email' => 'required|email|unique:admins,email,' . $id,
-            'phone' => 'required|min:7|unique:admins,phone,' . $id,
-            'password' => ['nullable','confirmed', Password::min(8)],
+            'name'     => 'required|min:3',
+            'email'    => 'required|email|unique:admins,email,' . $id,
+            'phone'    => 'required|min:7|unique:admins,phone,' . $id,
+            'password' => ['nullable', 'confirmed', Password::min(8)],
 
 //            'role_id' => 'required|exists:roles,id',
         ]);
 
-        if (!is_array($validator) && $validator->fails()) {
+        if (! is_array($validator) && $validator->fails()) {
             return redirect()->back()->withErrors($validator->validated());
         }
 
@@ -112,10 +108,10 @@ class AdminsController extends Controller
         }
 
         $data = [
-            'name' => $request->name,
+            'name'  => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'type' => $request->type,
+            //    'type'  => $request->type,
         ];
 
         if ($request->filled('password')) {
@@ -124,13 +120,12 @@ class AdminsController extends Controller
 
         $admin->update($data);
 
-//        $role = Role::findOrFail($request->role_id);
+        // $role = Role::findOrFail($request->role_id);
 
         // assign role
-//        $admin->removeRole($role);
-
-//        $admin->addRole($role);
-
+        $admin->roles()->detach();
+        $role = $request->role;
+        $admin->addRole($role);
 
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
@@ -149,7 +144,7 @@ class AdminsController extends Controller
 
             $admin->delete();
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
@@ -161,16 +156,16 @@ class AdminsController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
-            $ids = explode(',',$request->ids);
+            $ids       = explode(',', $request->ids);
             $validator = Validator::make(['ids' => $ids], [
-                'ids' => 'required|array',
+                'ids'   => 'required|array',
                 'ids.*' => 'required|integer|exists:admins,id',
             ]);
-            if (!is_array($validator) && $validator->fails()) {
+            if (! is_array($validator) && $validator->fails()) {
                 return redirect()->back()->withErrors($validator->validated());
             }
 
-            $admins = Admin::whereIn('id',$ids)->get();
+            $admins = Admin::whereIn('id', $ids)->get();
 
             // prevent update first admin
             $deleteAdmin = false;
@@ -187,15 +182,13 @@ class AdminsController extends Controller
 
             $admins->delete();
 
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             session()->flash('error', __('Can Not Delete Item Because of it\'s dependency'));
             return redirect()->back();
         }
         session()->flash('success', __('Operation Done Successfully'));
         return redirect()->back();
     }
-
-
 
     /**
      * @param Request $request
@@ -210,14 +203,14 @@ class AdminsController extends Controller
                 return '
                     <th scope="row">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="'.$row->id.'">
+                            <input class="form-check-input" type="checkbox" name="selectedItems[]" value="' . $row->id . '">
                         </div>
                     </th>
                 ';
             })
             ->addColumn('role', function ($row) {
-                $roles = $row->roles()->pluck('display_name_' . \app()->getLocale() )->toArray();
-                if (!empty($roles)) {
+                $roles = $row->roles()->pluck('display_name_' . \app()->getLocale())->toArray();
+                if (! empty($roles)) {
                     $roleString = implode(', ', $roles);
                     return $roleString;
                 }
@@ -225,17 +218,30 @@ class AdminsController extends Controller
             })
             ->addColumn('action', function ($row) {
                 $actionButtons = '';
-                if (!$row->hasRole('super_admin')) {
-                    $actionButtons = '
-                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Edit').'">
-                        <a href="'.route('admins.edit',$row->id).'" class="text-primary d-inline-block edit-item-btn">
+
+                // زر مشاهدة الأنشطة (متاح للجميع)
+                $admin = Admin::find($row->id);
+                if ($admin->hasRole('DataEntry')) {
+                    $actionButtons .= '
+                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="مشاهدة الأنشطة">
+                            <a href="' . route('admin.admins.activity', $row->id) . '" class="text-info d-inline-block">
+                                <i class="ri-history-line fs-16"></i>
+                            </a>
+                        </li>
+                    ';
+                }
+
+                if (! $row->hasRole('super_admin')) {
+                    $actionButtons .= '
+                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Edit') . '">
+                        <a href="' . route('admins.edit', $row->id) . '" class="text-primary d-inline-block edit-item-btn">
                             <i class="ri-pencil-fill fs-16"></i>
                         </a>
                     </li>
                 ';
                     $actionButtons .= '
-                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="'.__('Remove').'">
-                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="'.$row->id.'" href="#deleteRecordModal">
+                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="' . __('Remove') . '">
+                            <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" data-model-id="' . $row->id . '" href="#deleteRecordModal">
                                 <i class="ri-delete-bin-5-fill fs-16"></i>
                             </a>
                         </li>
@@ -247,6 +253,14 @@ class AdminsController extends Controller
                         ' . $actionButtons . '
                     </ul>
                 ';
+            })
+            ->editColumn('role', function ($row) {
+                $roles = $row->roles()->pluck('display_name_' . \app()->getLocale())->toArray();
+                if (! empty($roles)) {
+                    $roleString = implode(', ', $roles);
+                    return $roleString;
+                }
+                return '-';
             })
             ->editColumn('created_at', function ($row) {
                 return Carbon::parse($row->created_at)->toDateString();
@@ -269,17 +283,17 @@ class AdminsController extends Controller
                         ->orWhere('email', 'like', "%$searchKey%")
                         ->orWhere('phone', 'like', "%$searchKey%");
                 })
-                    ->orWhereHas('roles',function ($query) use ($searchKey) {
+                    ->orWhereHas('roles', function ($query) use ($searchKey) {
                         $query->where('name', 'like', "%$searchKey%")
                             ->orWhere('display_name_ar', 'like', "%$searchKey%")
                             ->orWhere('display_name_en', 'like', "%$searchKey%");
                     });
             })
             ->when($request->has('from_date') && $request->filled('from_date'), function ($query) use ($request) {
-                $query->where('created_at','>=',$request->from_date);
+                $query->where('created_at', '>=', $request->from_date);
             })
             ->when($request->has('to_date') && $request->filled('to_date'), function ($query) use ($request) {
-                $query->where('created_at','<=',$request->to_date);
+                $query->where('created_at', '<=', $request->to_date);
             });
 
         return $adminsQuery;
@@ -294,6 +308,8 @@ class AdminsController extends Controller
             ['data' => 'email', 'name' => 'email', 'label' => __('Email')],
             ['data' => 'phone', 'name' => 'phone', 'label' => __('Phone')],
 //            ['data' => 'role', 'name' => 'role', 'label' => __('Role')],
+            //add role column here
+            ['data' => 'role', 'name' => 'role', 'label' => __('Role')],
             ['data' => 'created_at', 'name' => 'created_at', 'label' => __('Created At')],
             ['data' => 'action', 'name' => 'action', 'label' => __('Action')],
         ];

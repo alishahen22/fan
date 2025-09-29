@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Models;
 
+use App\Traits\ActivityLoggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use HasFactory, ActivityLoggable;
 
     protected $fillable = [
         'key',
@@ -17,7 +17,7 @@ class Setting extends Model
 
     public function getImageAttribute($image)
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             if (file_exists(public_path('storage/' . $image))) {
                 return asset('storage') . '/' . $image;
             }
@@ -28,7 +28,7 @@ class Setting extends Model
 
     public function setImageAttribute($image)
     {
-        if (!empty($image)) {
+        if (! empty($image)) {
             $imageFields = $image;
             if (is_file($image)) {
                 $imageFields = upload($image);
