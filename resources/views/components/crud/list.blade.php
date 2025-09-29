@@ -13,13 +13,20 @@
             display: none;
         }
 
-        .dataTables_length {
-            display: none;
-        }
-
         .dt-buttons {
             margin-top: 3px;
             margin-bottom: 3px;
+        }
+
+        .dataTables_length {
+            margin-bottom: 15px;
+        }
+
+        .dataTables_length select {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
         }
 
     </style>
@@ -237,6 +244,11 @@
                 processing: true,
                 serverSide: true,
                 // searching: false,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "{{ app()->getLocale() == 'ar' ? 'الكل' : 'All' }}"]
+                ],
+                pageLength: 10,
                 ajax: {
                     url: '{{ $getDataRoute }}',
                     data: {
@@ -248,7 +260,7 @@
                     }
                 },
                 columns: {!! json_encode($columns) !!},
-                dom: 'Bfrtip',
+                dom: 'Blfrtip',
                 buttons: [
                     'copy', 'csv', 'excel', 'print', 'pdf', 'colvis'
                 ]
