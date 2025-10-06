@@ -1,11 +1,11 @@
 <?php
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\Quotation;
 use App\Models\PrintService;
+use App\Models\Quotation;
 use App\Models\QuotationItem;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class QuotationForm extends Component
 {
@@ -420,13 +420,23 @@ class QuotationForm extends Component
     //get new quotation number
     public function getNewQuotationNumber($type)
     {
-        $lastInvoice = \App\Models\Quotation::where('type', $type)->orderBy('id', 'desc')->first();
-        if ($type === 'invoice') {
-            $newInvoiceNumber = $lastInvoice ? 'INV-' . (explode('-', $lastInvoice->number)[1] + 1) : 'INV-1';
-        } else {
-            $newInvoiceNumber = $lastInvoice ? 'QT-' . (explode('-', $lastInvoice->number)[1] + 1) : 'QT-1';
-        }
-        //   dd($newInvoiceNumber);
-        $this->quotation_number = $newInvoiceNumber;
+        DB::transaction(function () use ($type) {
+            $lastInvoice = \App\Models\Quotation::where('type', $type)
+                ->lockForUpdate()
+                ->orderByDesc('id')
+                ->first();
+
+            if ($type === 'invoice') {
+                $newInvoiceNumber = $lastInvoice
+                    ? 'INV-' . ((int) explode('-', $lastInvoice->number)[1] + 1)
+                    : 'INV-1';
+            } else {
+                $newInvoiceNumber = $lastInvoice
+                    ? 'QT-' . ((int) explode('-', $lastInvoice->number)[1] + 1)
+                    : 'QT-1';
+            }
+
+            $this->quotation_number = $newInvoiceNumber;
+        });
     }
 }
