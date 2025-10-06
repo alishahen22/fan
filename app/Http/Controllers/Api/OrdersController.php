@@ -339,7 +339,7 @@ class OrdersController extends Controller
     //getQuotation
     public function getQuotation($type): JsonResponse
     {
-        $quotation = Quotation::where('type', $type)->with('items')->first();
+        $quotation = Quotation::where('type', $type)->with('items')->orderBy('id', 'desc')->get();
 
         return msgdata(true, trans('lang.quotation_fetched_s'), $quotation, Response::HTTP_OK);
 
