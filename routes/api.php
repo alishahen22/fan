@@ -169,3 +169,5 @@ Route::prefix('client')->group(function () {
     // Payment routes
 
 });
+
+Route::get('/quotations/{quotation}', [OrdersController::class, 'getQuotation']);

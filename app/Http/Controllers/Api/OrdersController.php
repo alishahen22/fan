@@ -10,6 +10,7 @@ use App\Models\Address;
 use App\Models\Setting;
 use App\Models\Voucher;
 use App\Models\OrderItem;
+use App\Models\Quotation;
 use App\Models\UserPoint;
 use App\Models\VoucherUser;
 use Illuminate\Http\Response;
@@ -334,4 +335,13 @@ class OrdersController extends Controller
     }
 
 
+
+    //getQuotation
+    public function getQuotation($type): JsonResponse
+    {
+        $quotation = Quotation::where('type', $type)->with('items')->first();
+
+        return msgdata(true, trans('lang.quotation_fetched_s'), $quotation, Response::HTTP_OK);
+
+    }
 }

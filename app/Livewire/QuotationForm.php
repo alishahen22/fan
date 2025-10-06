@@ -1,10 +1,11 @@
 <?php
 namespace App\Livewire;
 
-use App\Models\PrintService;
-use App\Models\Quotation;
-use App\Models\QuotationItem;
 use Livewire\Component;
+use App\Models\Quotation;
+use App\Models\PrintService;
+use App\Models\QuotationItem;
+use Illuminate\Support\Facades\DB;
 
 class QuotationForm extends Component
 {
@@ -246,99 +247,101 @@ class QuotationForm extends Component
     public function saveQuotation()
     {
         $type = $this->document_type;
+
         $this->validate([
             'customer_name'    => 'required|string|max:255',
             'quotation_number' => 'required|string|max:255|unique:quotations,number',
             'quotation_date'   => 'required|date',
-        ],
-            [
-                'customer_name.required'    => 'يرجى إدخال اسم العميل.',
-                'quotation_number.required' => 'يرجى إدخال رقم عرض السعر.',
-                'quotation_date.required'   => 'يرجى إدخال تاريخ عرض السعر.',
-            ]
-        );
+        ], [
+            'customer_name.required'    => 'يرجى إدخال اسم العميل.',
+            'quotation_number.required' => 'يرجى إدخال رقم عرض السعر.',
+            'quotation_date.required'   => 'يرجى إدخال تاريخ عرض السعر.',
+        ]);
 
         if (count($this->items) === 0) {
-            if ($type === 'quotation') {
-                session()->flash('error', '❌ لا يمكن حفظ عرض السعر بدون أصناف.');
-            } else {
-                session()->flash('error', '❌ لا يمكن حفظ الفاتورة بدون أصناف.');
-            }
+            $msg = $type === 'quotation'
+                ? '❌ لا يمكن حفظ عرض السعر بدون أصناف.'
+                : '❌ لا يمكن حفظ الفاتورة بدون أصناف.';
+            session()->flash('error', $msg);
             return;
         }
 
-                                       // احسب الأرقام النهائية
-        $subtotal  = $this->subtotal;  // يشمل الزيادة بالفعل
-        $taxAmount = $this->taxNumber; // ضريبة 15% من الإجمالي
-        $total     = $this->totalWithTax;
+        try {
+            DB::beginTransaction();
 
-        // إنشاء عرض السعر
-        $quotation = Quotation::create([
-            'customer_name'             => $this->customer_name,
-            'number'                    => $this->quotation_number,
-            'date'                      => $this->quotation_date,
-            'tax_number'                => $this->tax_number,
-            'commercial_record'         => $this->commercial_record,
-            'subtotal'                  => $subtotal,
-            'management_fee_percentage' => $this->price_modifier_percentage,                                                                    // نسبة الزيادة
-            'management_fee'            => round($subtotal * ($this->price_modifier_percentage / (100 + $this->price_modifier_percentage)), 2), // الزيادة الحقيقية قبل إضافتها، عشان لو حبيت تستخدمها
-            'tax_percentage'            => $this->tax,
-            'tax'                       => $taxAmount,
-            'total'                     => $total,
-            'type'                      => $type, // نوع العرض (عرض سعر أو فاتورة)
-            'user_id'                   => $this->selected_user_id,
-        ]);
-        // حفظ العناصر
-        foreach ($this->items as $item) {
-            $quotationItem = QuotationItem::create([
-                'quotation_id'     => $quotation->id,
-                'supplies_ids'     => json_encode($item['supplies'] ?? []),
-                'description'      => $item['description'],
-                'quantity'         => $item['quantity'],
-                'price'            => $item['price'],       // السعر شامل الزيادة
-                'total_price'      => $item['total_price'], // شامل الزيادة
-                'print_service_id' => $item['print_service_id'] ?? null,
+            // احسب الأرقام النهائية
+            $subtotal  = $this->subtotal;
+            $taxAmount = $this->taxNumber;
+            $total     = $this->totalWithTax;
+
+            // إنشاء عرض السعر
+            $quotation = Quotation::create([
+                'customer_name'             => $this->customer_name,
+                'number'                    => $this->quotation_number,
+                'date'                      => $this->quotation_date,
+                'tax_number'                => $this->tax_number,
+                'commercial_record'         => $this->commercial_record,
+                'subtotal'                  => $subtotal,
+                'management_fee_percentage' => $this->price_modifier_percentage,
+                'management_fee'            => round($subtotal * ($this->price_modifier_percentage / (100 + $this->price_modifier_percentage)), 2),
+                'tax_percentage'            => $this->tax,
+                'tax'                       => $taxAmount,
+                'total'                     => $total,
+                'type'                      => $type,
+                'user_id'                   => $this->selected_user_id,
             ]);
 
-            // if (!empty($item['supply_ids'])) {
-            //     $quotationItem->supplies()->sync($item['supply_ids']);
-            // }
+            // حفظ العناصر
+            foreach ($this->items as $item) {
+                QuotationItem::create([
+                    'quotation_id'     => $quotation->id,
+                    'supplies_ids'     => json_encode($item['supplies'] ?? []),
+                    'description'      => $item['description'],
+                    'quantity'         => $item['quantity'],
+                    'price'            => $item['price'],
+                    'total_price'      => $item['total_price'],
+                    'print_service_id' => $item['print_service_id'] ?? null,
+                ]);
+            }
+
+            DB::commit(); // ✅ لو كل حاجة تمام
+
+            // Reset
+            $this->items        = [];
+            $this->subtotal     = 0;
+            $this->taxNumber    = 0;
+            $this->totalWithTax = 0;
+            $this->reset([
+                'customer_name',
+                'quotation_number',
+                'tax_number',
+                'commercial_record',
+                'items',
+                'newItem',
+                'showAddItemModal',
+                'selected_user_id',
+                'price_modifier_percentage',
+                'selectedPrintServiceId',
+            ]);
+
+            $this->selected_user_id = '';
+            $this->selectKey++;
+
+            $this->getNewQuotationNumber($this->type);
+
+            $this->saveMessage = $this->document_type === 'quotation'
+                ? '✅ تم حفظ عرض السعر بنجاح!'
+                : '✅ تم حفظ الفاتورة بنجاح!';
+
+            $this->dispatch('toast-success');
+            $this->document_type = $this->type;
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ لو حصل خطأ
+
+            // رجع رسالة خطأ واضحة
+            session()->flash('error', 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage());
         }
-
-        // Reset
-        // 🧼 Reset
-
-        $this->items = []; // تأكيد يدوي
-
-        $this->subtotal     = 0;
-        $this->taxNumber    = 0;
-        $this->totalWithTax = 0;
-        $this->reset([
-            'customer_name',
-            'quotation_number',
-            'tax_number',
-            'commercial_record',
-            'items',
-            'newItem',
-            'showAddItemModal',
-            'selected_user_id',
-            'price_modifier_percentage',
-            'selectedPrintServiceId',
-
-        ]);
-
-        $this->selected_user_id = '';
-        $this->selectKey++; // غير المفتاح لإجبار إعادة البناء
-                            //document type
-        $this->getNewQuotationNumber($this->type);
-        if ($this->document_type === 'quotation') {
-            $this->saveMessage = '✅ تم حفظ عرض السعر بنجاح!';
-        } else {
-            $this->saveMessage = '✅ تم حفظ الفاتورة بنجاح!';
-        }
-        $this->dispatch('toast-success');
-        $this->document_type = $this->type;
-
     }
 
     public function loadPrintServiceInfo($id)
