@@ -44,6 +44,15 @@ class QuotationForm extends Component
     public $saveMessage    = '';
     public $selectKey      = 0; // مفتاح لتحديث المستخدم المختار
 
+    // Quick Add Properties
+    public $quickAddVisible = false;
+    public $quickItem = [
+        'description' => '',
+        'quantity' => 1,
+        'price' => 0,
+        'total_price' => 0,
+    ];
+
     public function render()
     {
         return view('livewire.quotation-form');
@@ -322,6 +331,8 @@ class QuotationForm extends Component
                 'selected_user_id',
                 'price_modifier_percentage',
                 'selectedPrintServiceId',
+                'quickAddVisible',
+                'quickItem',
             ]);
 
             $this->selected_user_id = '';
@@ -383,10 +394,12 @@ class QuotationForm extends Component
         $this->saveQuotation();
         $quotation = Quotation::where('number', $quotation_number)->first();
         // Redirect to the print view
-        if ($quotation->type === 'invoice') {
+        if ($quotation?->type === 'invoice') {
             return redirect()->route('invoices.show', ['invoice' => $quotation->id])->with('print', true);
-        } else {
+        } elseif ($quotation?->type === 'quotation') {
             return redirect()->route('quotations.show', ['quotation' => $quotation->id])->with('print', true);
+        }else {
+            return;
         }
     }
 
@@ -401,10 +414,12 @@ class QuotationForm extends Component
             return;
         }
         // Generate PDF
-        if ($quotation->type === 'invoice') {
-            return redirect()->route('invoices.pdf', ['invoice' => $quotation->id]);
-        } else {
-            return redirect()->route('quotations.pdf', ['quotation' => $quotation->id]);
+        if ($quotation?->type === 'invoice') {
+            return redirect()->route('invoices.pdf', ['invoice' => $quotation?->id]);
+        } elseif ($quotation?->type === 'quotation') {
+            return redirect()->route('quotations.pdf', ['quotation' => $quotation?->id]);
+        }else {
+            return;
         }
 
     }
@@ -438,5 +453,81 @@ class QuotationForm extends Component
 
             $this->quotation_number = $newInvoiceNumber;
         });
+    }
+
+    // Quick Add Methods
+    public function showQuickAdd()
+    {
+        if (empty($this->customer_name)) {
+            $this->addError('customer_name', '❌ يرجى إدخال اسم العميل قبل إضافة الأصناف.');
+            return;
+        }
+
+        $this->quickAddVisible = true;
+        $this->quickItem = [
+            'description' => '',
+            'quantity' => 1,
+            'price' => 0,
+            'total_price' => 0,
+        ];
+    }
+
+    public function hideQuickAdd()
+    {
+        $this->quickAddVisible = false;
+        $this->quickItem = [
+            'description' => '',
+            'quantity' => 1,
+            'price' => 0,
+            'total_price' => 0,
+        ];
+    }
+
+    public function updatedQuickItemQuantity()
+    {
+        $this->calculateQuickTotal();
+    }
+
+    public function updatedQuickItemPrice()
+    {
+        $this->calculateQuickTotal();
+    }
+
+    public function calculateQuickTotal()
+    {
+        $quantity = floatval($this->quickItem['quantity'] ?: 0);
+        $price = floatval($this->quickItem['price'] ?: 0);
+        $this->quickItem['total_price'] = round($quantity * $price, 2);
+    }
+
+    public function addQuickItem()
+    {
+        $this->validate([
+            'quickItem.description' => 'required|string|max:255',
+            'quickItem.quantity' => 'required|numeric|min:0.01',
+            'quickItem.price' => 'required|numeric|min:0',
+        ], [
+            'quickItem.description.required' => 'يرجى إدخال وصف الصنف.',
+            'quickItem.quantity.required' => 'يرجى إدخال الكمية.',
+            'quickItem.quantity.min' => 'الكمية يجب أن تكون أكبر من 0.',
+            'quickItem.price.required' => 'يرجى إدخال السعر.',
+            'quickItem.price.min' => 'السعر يجب أن يكون 0 أو أكبر.',
+        ]);
+
+        // Add item to the items array
+        $this->items[] = [
+            'print_service_id' => 0,
+            'names' => [],
+            'description' => $this->quickItem['description'],
+            'supplies' => [],
+            'quantity' => $this->quickItem['quantity'],
+            'price' => $this->quickItem['price'],
+            'total_price' => $this->quickItem['total_price'],
+        ];
+
+        // Reset and hide quick add
+        $this->hideQuickAdd();
+
+        session()->flash('success', '✅ تم إضافة الصنف بنجاح');
     }
 }

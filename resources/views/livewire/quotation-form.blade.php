@@ -122,11 +122,48 @@
 
 
 
-    {{-- زر إضافة صنف --}}
-    <div class="mb-4">
-       <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف</button>
-       {{-- <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف</button> --}}
+    {{-- Quick Add Section --}}
+    @if($quickAddVisible)
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-light">
+            <h6 class="mb-0 text-light">⚡ إضافة سريعة</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">وصف الصنف</label>
+                    <input type="text" wire:model="quickItem.description" class="form-control" placeholder="مثال: كروت شخصية">
+                    @error('quickItem.description') <small class="text-danger">{{ $message }}</small> @enderror
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">الكمية</label>
+                    <input type="number" wire:model.live.debounce.300ms="quickItem.quantity" class="form-control" step="1" min="1">
+                    @error('quickItem.quantity') <small class="text-danger">{{ $message }}</small> @enderror
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">السعر</label>
+                    <input type="number" wire:model.live.debounce.300ms="quickItem.price" class="form-control" step="1" min="1">
+                    @error('quickItem.price') <small class="text-danger">{{ $message }}</small> @enderror
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">الإجمالي</label>
+                    <input type="text" value="{{ number_format($quickItem['total_price'] ?? 0, 2) }} ر.س" class="form-control bg-light" readonly>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button wire:click="addQuickItem" class="btn btn-success me-2">✅ إضافة</button>
+                    <button wire:click="hideQuickAdd" class="btn btn-outline-secondary">❌</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
+    {{-- أزرار الإضافة --}}
+    <div class="mb-4">
+        @if(!$quickAddVisible)
+            <button wire:click="showQuickAdd" class="btn btn-success me-2">⚡ إضافة سريعة</button>
+        @endif
+        <button wire:click="openAddItemModal" class="btn btn-primary">➕ إضافة صنف متقدم</button>
     </div>
     {{-- الإجماليات --}}
     <div class="text-end my-4 p-4 bg-light rounded shadow-sm border" style="max-width: 400px; margin-right: auto;">
@@ -332,6 +369,28 @@
 
 .select2-container--open .select2-dropdown {
     z-index: 9999;
+}
+
+/* Quick Add Styling */
+.card.border-primary {
+    border: 2px solid #0d6efd !important;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 </style>
 
