@@ -275,8 +275,8 @@ class QuotationForm extends Component
             return;
         }
 
-        // try {
-        //     DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
             // احسب الأرقام النهائية
             $subtotal  = $this->subtotal;
@@ -313,7 +313,7 @@ class QuotationForm extends Component
                 ]);
             }
 
-     //       DB::commit(); // ✅ لو كل حاجة تمام
+           DB::commit(); // ✅ لو كل حاجة تمام
 
             // Reset
             $this->items        = [];
@@ -347,12 +347,12 @@ class QuotationForm extends Component
             $this->dispatch('toast-success');
             $this->document_type = $this->type;
 
-        // } catch (\Exception $e) {
-        //     DB::rollBack(); // ❌ لو حصل خطأ
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ لو حصل خطأ
 
-        //     // رجع رسالة خطأ واضحة
-        //     session()->flash('error', 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage());
-        // }
+            // رجع رسالة خطأ واضحة
+            session()->flash('error', 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage());
+        }
     }
 
     public function loadPrintServiceInfo($id)
