@@ -516,7 +516,7 @@ class QuotationForm extends Component
 
         // Add item to the items array
         $this->items[] = [
-            'print_service_id' => 0,
+            'print_service_id' => null,
             'names' => [],
             'description' => $this->quickItem['description'],
             'supplies' => [],
